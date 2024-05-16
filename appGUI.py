@@ -1,6 +1,6 @@
 import sys
 from PyQt5.uic import loadUi
-from PySide6.QtCore import QPoint
+#from PySide6.QtCore import QPoint
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFrame, QDesktopWidget
 from PyQt5.QtGui import *
