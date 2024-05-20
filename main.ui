@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1200</width>
-    <height>766</height>
+    <height>791</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -37,419 +37,6 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QWidget" name="menuIcons" native="true">
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">QWidget{
-	background-color: rgb(59,59,59);
-}
-
-QPushButton{
-	background-color: rgb(59,59,59);
-	color: white;
-	height:30px;
-	border:none;
-	border-bottom-left-radius:10px;
-	border-top-left-radius:10px;
-}
-QPushButton:checked{
-	background-color: rgb(52,17,26);
-	color: white;
-	font-weight:bold;
-}
-
-QPushButton:hover{
-	background-color:  rgb(52,17,26);
-	color: white;
-	font-weight:bold;
-}
-QLabel{
-	color:white;
-	text-align:center;
-}</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_5">
-       <property name="spacing">
-        <number>15</number>
-       </property>
-       <property name="leftMargin">
-        <number>6</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <item>
-        <spacer name="verticalSpacer_6">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>89</width>
-           <height>50</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="minimumSize">
-          <size>
-           <width>100</width>
-           <height>100</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>100</width>
-           <height>100</height>
-          </size>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap resource="UI/UI resources/icons.qrc">:/Logo/LOGO/whiteLogo.svg</pixmap>
-         </property>
-         <property name="scaledContents">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="attendanceMenuIconButton">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="UI/UI resources/icons.qrc">
-           <normaloff>:/whiteIcons/whiteIcons/check-square.svg</normaloff>:/whiteIcons/whiteIcons/check-square.svg</iconset>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="manageStudentsMenuIconButton">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="UI/UI resources/icons.qrc">
-           <normaloff>:/whiteIcons/whiteIcons/users.svg</normaloff>:/whiteIcons/whiteIcons/users.svg</iconset>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="manageClassesMenuIconButton">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="UI/UI resources/icons.qrc">
-           <normaloff>:/whiteIcons/whiteIcons/archive.svg</normaloff>:/whiteIcons/whiteIcons/archive.svg</iconset>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>322</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_10">
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="UI/UI resources/icons.qrc">
-           <normaloff>:/whiteIcons/whiteIcons/log-out.svg</normaloff>:/whiteIcons/whiteIcons/log-out.svg</iconset>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QWidget" name="menuLabels" native="true">
-      <property name="minimumSize">
-       <size>
-        <width>200</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">QWidget{
-	background-color: rgb(59,59,59);
-}
-
-QPushButton{
-	background-color: rgb(59,59,59);
-	color: white;
-	height:30px;
-	text-align:left;
-	border: none;
-	padding-left:10px;
-	border-bottom-left-radius:10px;
-	border-top-left-radius:10px;
-}
-
-QPushButton:checked{
-	background-color: rgb(52,17,26);
-	color: white;
-	font-weight:bold;
-}
-
-QPushButton:hover{
-	background-color:  rgb(52,17,26);
-	color: white;
-	font-weight:bold;
-}
-
-QLabel{
-	color:white;
-	text-align:center;
-}</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <property name="spacing">
-        <number>15</number>
-       </property>
-       <property name="leftMargin">
-        <number>6</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <item>
-        <spacer name="verticalSpacer_5">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>50</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QWidget" name="widget_5" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_7">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="label_2">
-            <property name="minimumSize">
-             <size>
-              <width>100</width>
-              <height>100</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>100</width>
-              <height>100</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="pixmap">
-             <pixmap resource="UI/UI resources/icons.qrc">:/Logo/LOGO/whiteLogo.svg</pixmap>
-            </property>
-            <property name="scaledContents">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_9">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Sidebar</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="attendanceMenuLabelButton">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Take Attendance</string>
-         </property>
-         <property name="icon">
-          <iconset resource="UI/UI resources/icons.qrc">
-           <normaloff>:/whiteIcons/whiteIcons/check-square.svg</normaloff>:/whiteIcons/whiteIcons/check-square.svg</iconset>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="manageStudentsMenuLabelButton">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Manage Students</string>
-         </property>
-         <property name="icon">
-          <iconset resource="UI/UI resources/icons.qrc">
-           <normaloff>:/whiteIcons/whiteIcons/users.svg</normaloff>:/whiteIcons/whiteIcons/users.svg</iconset>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="manageClassesMenuLabelButton">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Manage Classes</string>
-         </property>
-         <property name="icon">
-          <iconset resource="UI/UI resources/icons.qrc">
-           <normaloff>:/whiteIcons/whiteIcons/archive.svg</normaloff>:/whiteIcons/whiteIcons/archive.svg</iconset>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>322</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_15">
-         <property name="text">
-          <string>Sign Out</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
      <widget class="QWidget" name="widget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout">
        <property name="spacing">
@@ -467,7 +54,7 @@ QLabel{
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item alignment="Qt::AlignVCenter">
+       <item>
         <widget class="QWidget" name="headerWidget" native="true">
          <property name="minimumSize">
           <size>
@@ -498,45 +85,6 @@ QPushButton:hover{
 }</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <item>
-           <widget class="QPushButton" name="pushButton_12">
-            <property name="minimumSize">
-             <size>
-              <width>60</width>
-              <height>60</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>60</width>
-              <height>60</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="UI/UI resources/icons.qrc">
-              <normaloff>:/whiteIcons/whiteIcons/menu.svg</normaloff>:/whiteIcons/whiteIcons/menu.svg</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Menu</string>
-            </property>
-           </widget>
-          </item>
           <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
@@ -571,6 +119,13 @@ QPushButton:hover{
            </spacer>
           </item>
           <item>
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Welcome Back, User</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QLabel" name="label_8">
             <property name="minimumSize">
              <size>
@@ -596,7 +151,7 @@ QPushButton:hover{
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_16">
+           <widget class="QPushButton" name="userDropMenuButton">
             <property name="minimumSize">
              <size>
               <width>35</width>
@@ -622,6 +177,12 @@ QPushButton:hover{
               <height>20</height>
              </size>
             </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="autoExclusive">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
          </layout>
@@ -639,7 +200,7 @@ QPushButton:hover{
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="attendancePage">
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -656,8 +217,8 @@ QPushButton:hover{
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>874</width>
-                <height>666</height>
+                <width>1180</width>
+                <height>691</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -770,45 +331,6 @@ QPushButton:hover{
                     </property>
                     <layout class="QHBoxLayout" name="horizontalLayout_4">
                      <item>
-                      <widget class="QComboBox" name="subjectSelectButton">
-                       <property name="styleSheet">
-                        <string notr="true">background-color: rgb(222, 215, 255);</string>
-                       </property>
-                       <property name="editable">
-                        <bool>false</bool>
-                       </property>
-                       <property name="currentText">
-                        <string comment="select class" extracomment="select class"/>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QComboBox" name="courseNameSelectButton">
-                       <property name="styleSheet">
-                        <string notr="true">background-color: rgb(222, 215, 255);</string>
-                       </property>
-                       <property name="editable">
-                        <bool>false</bool>
-                       </property>
-                       <property name="currentText">
-                        <string comment="select class" extracomment="select class"/>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QComboBox" name="sectionSelectButton">
-                       <property name="styleSheet">
-                        <string notr="true">background-color: rgb(222, 215, 255);</string>
-                       </property>
-                       <property name="editable">
-                        <bool>false</bool>
-                       </property>
-                       <property name="currentText">
-                        <string comment="select class" extracomment="select class"/>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
                       <spacer name="horizontalSpacer_4">
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
@@ -887,10 +409,137 @@ QPushButton:hover{
             <widget class="QWidget" name="widget_2" native="true">
              <layout class="QVBoxLayout" name="verticalLayout_7">
               <item>
-               <widget class="QLabel" name="label_3">
-                <property name="text">
-                 <string>Manage Students</string>
-                </property>
+               <widget class="QWidget" name="widget_16" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_20">
+                 <item>
+                  <widget class="QWidget" name="widget_17" native="true">
+                   <layout class="QHBoxLayout" name="horizontalLayout_16">
+                    <item>
+                     <widget class="QLabel" name="label_15">
+                      <property name="text">
+                       <string>Your Students</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_6">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>1051</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QWidget" name="widget_18" native="true">
+                   <property name="styleSheet">
+                    <string notr="true">QLineEdit{
+	padding-left:10px;
+	border: 2px solid gray;
+	border-radius: 10px;
+}
+
+</string>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_17">
+                    <item>
+                     <widget class="QLineEdit" name="lineEdit_3">
+                      <property name="placeholderText">
+                       <string>Find Student ...</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="pushButton_3">
+                      <property name="text">
+                       <string>Search</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_14">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>818</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="widget_15" native="true">
+                <layout class="QGridLayout" name="gridLayout_2">
+                 <item row="0" column="0">
+                  <widget class="QScrollArea" name="scrollArea_4">
+                   <property name="widgetResizable">
+                    <bool>true</bool>
+                   </property>
+                   <widget class="QWidget" name="scrollAreaWidgetContents_5">
+                    <property name="geometry">
+                     <rect>
+                      <x>0</x>
+                      <y>0</y>
+                      <width>1144</width>
+                      <height>543</height>
+                     </rect>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_3">
+                     <item row="0" column="0">
+                      <widget class="QWidget" name="addCourseButtonWidget_3" native="true">
+                       <property name="maximumSize">
+                        <size>
+                         <width>150</width>
+                         <height>120</height>
+                        </size>
+                       </property>
+                       <layout class="QVBoxLayout" name="verticalLayout_21">
+                        <item>
+                         <widget class="QPushButton" name="addCourseButton_3">
+                          <property name="maximumSize">
+                           <size>
+                            <width>16777215</width>
+                            <height>100</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string/>
+                          </property>
+                          <property name="icon">
+                           <iconset resource="UI/UI resources/icons.qrc">
+                            <normaloff>:/blackIcons/BlackIcons/plus.svg</normaloff>:/blackIcons/BlackIcons/plus.svg</iconset>
+                          </property>
+                          <property name="iconSize">
+                           <size>
+                            <width>50</width>
+                            <height>50</height>
+                           </size>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
               </item>
              </layout>
@@ -898,17 +547,387 @@ QPushButton:hover{
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="ManageClassesPage">
+         <widget class="QWidget" name="manageClassesPage">
           <layout class="QVBoxLayout" name="verticalLayout_10">
            <item>
             <widget class="QWidget" name="widget_3" native="true">
              <layout class="QVBoxLayout" name="verticalLayout_8">
               <item>
-               <widget class="QLabel" name="label_5">
+               <widget class="QFrame" name="frame_6">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>120</height>
+                 </size>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_11">
+                 <item>
+                  <widget class="QWidget" name="widget_8" native="true">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>50</height>
+                    </size>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_7">
+                    <item>
+                     <widget class="QLabel" name="label_5">
+                      <property name="text">
+                       <string>Your Dashboard</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_8">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>578</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QWidget" name="widget_7" native="true">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>50</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QLineEdit{
+	padding-left:10px;
+	border: 2px solid gray;
+	border-radius: 10px;
+}</string>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_10">
+                    <item>
+                     <widget class="QLineEdit" name="lineEdit">
+                      <property name="styleSheet">
+                       <string notr="true"/>
+                      </property>
+                      <property name="placeholderText">
+                       <string>Find Course ...</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="pushButton">
+                      <property name="text">
+                       <string>Search</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_7">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>398</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="widget_5" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_4">
+                 <item>
+                  <widget class="QWidget" name="widget_6" native="true">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>50</height>
+                    </size>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_8">
+                    <item>
+                     <widget class="QLabel" name="label">
+                      <property name="text">
+                       <string>Your Classes:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_9">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>1072</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QScrollArea" name="scrollArea_2">
+                   <property name="styleSheet">
+                    <string notr="true">
+QPushButton{
+	height:30px;
+	text-align:center;
+	border:none;
+}
+
+
+QPushButton:hover{
+	background-color: #ffffff;
+}</string>
+                   </property>
+                   <property name="widgetResizable">
+                    <bool>true</bool>
+                   </property>
+                   <widget class="QWidget" name="scrollAreaWidgetContents_2">
+                    <property name="geometry">
+                     <rect>
+                      <x>0</x>
+                      <y>0</y>
+                      <width>1144</width>
+                      <height>500</height>
+                     </rect>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_11">
+                     <item>
+                      <layout class="QGridLayout" name="coursesGridLayout" rowminimumheight="0" columnminimumwidth="0">
+                       <property name="sizeConstraint">
+                        <enum>QLayout::SetFixedSize</enum>
+                       </property>
+                       <property name="spacing">
+                        <number>10</number>
+                       </property>
+                       <item row="0" column="0">
+                        <widget class="QWidget" name="addCourseButtonWidget" native="true">
+                         <property name="maximumSize">
+                          <size>
+                           <width>150</width>
+                           <height>120</height>
+                          </size>
+                         </property>
+                         <layout class="QVBoxLayout" name="verticalLayout_13">
+                          <item>
+                           <widget class="QPushButton" name="addCourseButton">
+                            <property name="maximumSize">
+                             <size>
+                              <width>16777215</width>
+                              <height>100</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string/>
+                            </property>
+                            <property name="icon">
+                             <iconset resource="UI/UI resources/icons.qrc">
+                              <normaloff>:/blackIcons/BlackIcons/plus.svg</normaloff>:/blackIcons/BlackIcons/plus.svg</iconset>
+                            </property>
+                            <property name="iconSize">
+                             <size>
+                              <width>50</width>
+                              <height>50</height>
+                             </size>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                      </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="reportsPage">
+          <layout class="QVBoxLayout" name="verticalLayout_16">
+           <item>
+            <widget class="QWidget" name="widget_4" native="true">
+             <layout class="QVBoxLayout" name="verticalLayout_17">
+              <item>
+               <widget class="QLabel" name="label_3">
                 <property name="text">
-                 <string>Manage Classes  Page</string>
+                 <string>Reports</string>
                 </property>
                </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>653</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="profilePage">
+          <layout class="QHBoxLayout" name="horizontalLayout_15">
+           <item>
+            <widget class="QWidget" name="widget_13" native="true">
+             <layout class="QVBoxLayout" name="verticalLayout_18">
+              <property name="spacing">
+               <number>10</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_10">
+                <property name="text">
+                 <string>User Name</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_11">
+                <property name="text">
+                 <string>DOB</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_12">
+                <property name="text">
+                 <string>Department Name</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_13">
+                <property name="text">
+                 <string>Password</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_14">
+                <property name="text">
+                 <string>Email</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>557</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="widget_14" native="true">
+             <layout class="QVBoxLayout" name="verticalLayout_19">
+              <property name="spacing">
+               <number>8</number>
+              </property>
+              <item>
+               <widget class="QTextEdit" name="textEdit">
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>15</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QTextEdit" name="textEdit_2">
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>15</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QTextEdit" name="textEdit_3">
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>15</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QTextEdit" name="textEdit_4">
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>15</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QTextEdit" name="textEdit_5">
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>15</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>557</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </widget>
@@ -927,198 +946,5 @@ QPushButton:hover{
   <include location="UI/UI resources/backgoundImages.qrc"/>
   <include location="UI/UI resources/icons.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>attendanceMenuLabelButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>attendanceMenuIconButton</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>132</x>
-     <y>145</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>84</x>
-     <y>143</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_10</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>59</x>
-     <y>738</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>57</x>
-     <y>877</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_15</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>177</x>
-     <y>728</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>181</x>
-     <y>871</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>attendanceMenuIconButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>attendanceMenuLabelButton</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>90</x>
-     <y>153</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>135</x>
-     <y>159</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>manageClassesMenuLabelButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manageClassesMenuIconButton</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>126</x>
-     <y>231</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>99</x>
-     <y>231</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>manageClassesMenuIconButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manageClassesMenuLabelButton</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>63</x>
-     <y>249</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>151</x>
-     <y>245</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_10</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>pushButton_15</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>79</x>
-     <y>727</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>147</x>
-     <y>737</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>manageStudentsMenuIconButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manageStudentsMenuLabelButton</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>60</x>
-     <y>197</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>154</x>
-     <y>203</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>manageStudentsMenuLabelButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manageStudentsMenuIconButton</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>159</x>
-     <y>182</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>81</x>
-     <y>187</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_15</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>pushButton_10</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>156</x>
-     <y>728</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>88</x>
-     <y>721</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_12</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>menuIcons</receiver>
-   <slot>setHidden(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>253</x>
-     <y>43</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>106</x>
-     <y>334</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_12</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>menuLabels</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>272</x>
-     <y>49</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>217</x>
-     <y>376</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
