@@ -1,5 +1,7 @@
+import logging
 import firebase_admin
 from firebase_admin import credentials, db, storage
+import numpy as np
 
 
 
@@ -41,7 +43,7 @@ class FaceRecognitionFirebaseDB():
         '''
     def __str__(self):
         return self._name
-           
+
     def addStudent(self, studentDict):
         for key, value in studentDict.items():
             self._student_ref.child(key).set(value)
@@ -53,109 +55,86 @@ class FaceRecognitionFirebaseDB():
     def getStudentDB(self, studentID: str):
         ''' Make API call to get ONE student from firebase'''
         return db.reference(f"Students/{studentID}").get()
-    
+
     def getInstructorDB(self, instructorID: str):
         ''' Make API call to get ONE instructor from firebase'''
         return db.reference(f"Instructors/{instructorID}").get()
-    
-    def getAllStudents(self):
-        '''
-        Get all students in database
-        '''
-        return db.reference("Students").get()
-    
-    def getAllInstructors(self):
-        '''
-        Get all instructors in database
-        '''
-        return db.reference("Instructors").get()
-    
-    def updateStudentData(self, studentID:str, newStudentData:dict):
-        '''
-        StudentID: string
-        newStudentData: dictionary in the ff format: 
-            {
-            "name": ...,
-            "major": ...
-            }
-        '''
-        student_info = self.getStudentDB(studentID)
 
+    def deleteStudent(self, student_id):
+        try:
+            logging.debug(f"Deleting student with ID: {student_id}")
+            student_ref = self._student_ref.child(student_id)
+            student_ref.remove()  # Correct method to delete a node in Firebase Realtime Database
+            logging.info(f"Student with ID {student_id} deleted successfully.")
+        except Exception as e:
+            logging.error(f"Error during delete: {str(e)}")
+            raise
+
+    def getAllStudents(self):
+        return self._student_ref.get()
+
+    def updateStudentData(self, studentID: str, newStudentData: dict):
+        student_info = self.getStudentDB(studentID)
         for key in newStudentData.keys():
             try:
-                student_info[key] = newStudentData[key] #update field to be changed in firebase
-                ref = db.reference(f"Students/{studentID}") # get reference to the field
-                ref.child(key).set(student_info[key]) # set it to the new value
+                student_info[key] = newStudentData[key]
+                ref = db.reference(f"Students/{studentID}")
+                ref.child(key).set(student_info[key])
             except Exception as e:
-                #field not yet in db for that key ... do something (key not found error?)
+                logging.error(f"Error updating student data: {str(e)}")
                 pass
-        print(student_info)
 
-    
-    def updateInstructorData(self, instructorID:str, newInstructorData:dict, fields:list):
-        '''
-        InstructorID: string
-        newInstructorData: dictionary in the ff format
-            {
-            "First name": ...,
-            "department": ...
-            }
-        '''
+    def updateInstructorData(self, instructorID: str, newInstructorData: dict, fields: list):
         instructor_info = self.getInstructorDB(instructorID)
-
-        for key in newInstructorData.keys():
+        for key, value in newInstructorData.items():
             try:
-                instructor_info[key] = newInstructorData[key] # update field to be changed in firebase
-            
-                ref = db.reference(f"Instructors/{instructorID}") # get reference to the field
-                ref.child(key).set(instructor_info[key]) # set it to the new value
+                instructor_info[key] = value
+                ref = db.reference(f"Instructors/{instructorID}")
+                ref.child(key).set(value)
             except Exception as e:
-                #field not yet in db for that key ... do something (key not found error?)
+                logging.error(f"Error updating instructor data: {str(e)}")
                 pass
 
-    def getImgFromStorage(self, studentID:str):
-        try: 
-            self._blob = self._bucket.get_blob(f"Images/{studentID}.png")   
+    def getImgFromStorage(self, studentID: str):
+        try:
+            self._blob = self._bucket.get_blob(f"Images/{studentID}.png")
             self.img_array = np.frombuffer(self._blob.download_as_string(), np.uint8)
-            print("Download succesful")
+            print("Download successful")
         except Exception as e:
-            print("Upload unsuccesful: ",e)
-
-
+            logging.error(f"Download unsuccessful: {str(e)}")
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     print("Testing database")
 
     testDB = FaceRecognitionFirebaseDB("testDB")
 
-    #sample student data
     student_data = {
-            "3101002": {
-                "name": "Olasubomi Badiru",
-                "major": "Computer Science",
-                "minor": "Mathematics",
-                "total_attendance": 0
-            }
+        "3101002": {
+            "name": "Olasubomi Badiru",
+            "major": "Computer Science",
+            "minor": "Mathematics",
+            "total_attendance": 0
         }
-    
-    # sample instructor data
+    }
+
     instructor_data = {
-            "9101001": {
-                "first_name": "Mohammed",
-                "last_name": "El-hajj",
-                "department": "Computer Science",
-                "email": "elhajjm@macewan.ca",
-                "password": "barcelona"
-            }
+        "9101001": {
+            "first_name": "Mohammed",
+            "last_name": "El-hajj",
+            "department": "Computer Science",
+            "email": "elhajjm@macewan.ca",
+            "password": "barcelona"
         }
+    }
     testDB.addStudent(student_data)
     testDB.addStudent({
-        "3101003":{
+        "3101003": {
             "name": "Will Smith"
         }
     })
     testDB.addStudent({
-        "3101004":{
+        "3101004": {
             "name": "Cardi Bee"
         }
     })
@@ -163,5 +142,4 @@ if __name__ == '__main__':
     cardiTest = testDB.getStudentDB("3101003")
     print(cardiTest)
 
-    
     testDB.addInstructor(instructor_data)
