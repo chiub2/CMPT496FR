@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFrame, QAction, QMenu, Q
 from PyQt5.QtGui import *
 import numpy as np
 from AddStudentDialog import AddStudentDialog
+from AddCourseDialog import AddCourseDialog
 from mainWindowInterface import *
 import testCaptureUI
 from AddDataToDatabase import FaceRecognitionFirebaseDB
@@ -22,6 +23,13 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.db = FaceRecognitionFirebaseDB()   #-----> db here
         self.ui.setupUi(self)
+
+
+        #Change default Font
+        QFontDatabase.addApplicationFont("UI/Font/Kamerik105Cyrillic-Bold.ttf")
+        custom_font = QFont("Kamerik105Cyrillic-Bold")
+        # custom_font.setWeight(18)
+        QApplication.setFont(custom_font, "QLabel")
         # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         # self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
@@ -37,7 +45,6 @@ class MainWindow(QMainWindow):
             # columns
             for y in range(0,3):
                 self.createStudentWidget(x, y)
-                self.createCourseWidget(x, y)
 
         
         # Search for students
@@ -46,10 +53,17 @@ class MainWindow(QMainWindow):
         # Adding students to DataBase
         self.ui.addStudentButton_3.clicked.connect(self.show_add_student_dialog)
 
+        
+
         # Refreshing student data
         self.ui.refreshbutton.clicked.connect(self.refresh_student_data)
 
         self.ui.takeAttendanceButton.clicked.connect(self.launchCapture)
+
+        # Adding Course to DataBase
+        self.ui.addCourseButton.clicked.connect(self.show_add_course_dialog)
+
+
         self.show()
 
         
@@ -72,6 +86,48 @@ class MainWindow(QMainWindow):
         #set default screen
         self.switchToManageCoursesPage()
 
+
+#===================================================Adding Courses to Database
+    def show_add_course_dialog(self):
+        dialog = AddCourseDialog()
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            course_data = dialog.get_course_data()
+            self.add_course_to_db(course_data)
+    
+    def add_course_to_db(self, course_data):
+        course_data["students"] = [0]   #-----> student 0 doesn't exist
+        course_name = course_data["course_name"]
+        section_id = course_data["section_id"]
+        course_dict = {f"{course_name}-{section_id}": course_data}
+        print(course_dict)
+        self.db.addCourse(course_dict)
+        QMessageBox.information(self, "Success", "Course added successfully!")
+        self.refresh_course_data()
+
+    def refresh_course_data(self):
+        try:
+            print(20000)
+            for i in reversed(range(self.ui.coursesGridLayout.count())):
+                widget = self.ui.coursesGridLayout.itemAt(i).widget()
+                if widget is not None:
+                    widget.setParent(None)
+
+            courses = self.db.getAllCourses()
+            print(courses)
+            row = 0
+            col = 0
+            for course_name_sec_id, course_info in courses.items():
+                self.createCourseWidget(row, col, course_info)
+                col += 1
+                if col == 3:
+                    col = 0
+                    row += 1
+        except Exception as e:
+            print(f"Error during refresh: {e}")
+
+
+
+#===================================================Adding students to Database
 
     def search_student(self):
         try:
@@ -105,6 +161,8 @@ class MainWindow(QMainWindow):
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
             student_data = dialog.get_student_data()
             self.add_student_to_db(student_data)
+
+
 
     def add_student_to_db(self, student_data):
         student_id = student_data.pop("student_id")
@@ -236,7 +294,7 @@ class MainWindow(QMainWindow):
         testCaptureUI.launch()
 
 
-    def createCourseWidget(self, rowNumber, columnNumber):
+    def createCourseWidget(self, rowNumber, columnNumber, course_info = None):
         
         # CREATE NEW UNIQUE NAMES FOR THE WIDGETS ---> dev check. REMOVE BEFORE DEPLOY
         newName = "frame" + str(rowNumber) + "_" + str(columnNumber)
@@ -314,8 +372,14 @@ class MainWindow(QMainWindow):
 
         #retranslate functions
         _translate = QtCore.QCoreApplication.translate
-        self.courseNameCardLabel.setText(_translate("MainWindow", "Course Name"))
-        self.courseCardSectionLabel.setText(_translate("MainWindow", "Section Name"))
+        if course_info == None:
+            self.courseNameCardLabel.setText(_translate("MainWindow", "Course Name"))
+            self.courseCardSectionLabel.setText(_translate("MainWindow", "Section Name"))
+        else:
+            self.courseNameCardLabel.setText(_translate("MainWindow", course_info["course_name"]))
+            self.courseCardSectionLabel.setText(_translate("MainWindow", course_info["section_id"]))
+            
+        
         
         
         # Create new attribute to Ui_Mainwindow
@@ -412,15 +476,6 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    sys.exit(app.exec_())
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-
-    #testDB = DB("testDB")
     app = QApplication(sys.argv)
     window = MainWindow()
     sys.exit(app.exec_())
