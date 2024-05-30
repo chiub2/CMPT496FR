@@ -287,7 +287,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
 
-    testDB = DB("testDB")
+    # testDB = DB("testDB")
     app = QApplication(sys.argv)
     window = MainWindow()
     sys.exit(app.exec_())
