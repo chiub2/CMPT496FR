@@ -38,13 +38,13 @@ class MainWindow(QMainWindow):
 
         self.show()
 
-        # self.createNewWidgets(0, 0)
-        # FOR loop
-        # 10 rows
-        for x in range(0,10):
-            # columns
-            for y in range(0,3):
-                self.createStudentWidget(x, y)
+        # # self.createNewWidgets(0, 0)
+        # # FOR loop
+        # # 10 rows
+        # for x in range(0,10):
+        #     # columns
+        #     for y in range(0,3):
+        #         self.createStudentWidget(x, y)
 
         
         # Search for students
@@ -57,6 +57,7 @@ class MainWindow(QMainWindow):
 
         # Refreshing student data
         self.ui.refreshbutton.clicked.connect(self.refresh_student_data)
+        self.refresh_student_data()
 
         self.ui.takeAttendanceButton.clicked.connect(self.launchCapture)
 
@@ -165,7 +166,7 @@ class MainWindow(QMainWindow):
 
 
     def add_student_to_db(self, student_data):
-        student_id = student_data.pop("student_id")
+        student_id = student_data["student_id"]
         student_dict = {student_id: student_data}
         self.db.addStudent(student_dict)
         QMessageBox.information(self, "Success", "Student added successfully!")
@@ -181,22 +182,42 @@ class MainWindow(QMainWindow):
             students = self.db.getAllStudents()
             row = 0
             col = 0
-            for student_id, student_info in students.items():
-                self.createStudentWidget(row, col, student_info)
-                col += 1
-                if col == 3:
-                    col = 0
-                    row += 1
+            print(students)
+            '''
+            Some extremely weird behaviour going on here, if database is empty and user adds a student,
+            students will be of instance list, but if database is not empty and user adds or edits a student,
+            database will be of type dictionary
+
+
+            ---> temp fix, check for instance of students and execute approprriate algorithm
+            '''
+            if isinstance(students, list):
+                if students != None:
+                    for student in students:
+                        if student != None:
+                            self.createStudentWidget(row, col, student)
+                            col += 1
+                            if col == 3:
+                                col = 0
+                                row += 1
+            elif isinstance(students, dict):
+                for student_id, student_info in students.items():
+                    self.createStudentWidget(row, col, student_info)
+                    col += 1
+                    if col == 3:
+                        col = 0
+                        row += 1
         except Exception as e:
             print(f"Error during refresh: {e}")
 
     def edit_student(self, student_id):
         try:
             student_data = self.db.getStudent(student_id)
+            oldID = student_data["student_id"]
             dialog = AddStudentDialog(student_data)
             if dialog.exec_() == QtWidgets.QDialog.Accepted:
                 updated_data = dialog.get_student_data()
-                self.db.updateStudent(student_id, updated_data)
+                self.db.updateStudent(student_id, oldID, updated_data)
                 self.refresh_student_data()
         except Exception as e:
             print(f"Error during edit: {e}")
@@ -245,14 +266,14 @@ class MainWindow(QMainWindow):
         #Add actions to the menu
         for item_text in menu_items:
             action = QAction(item_text, self)
-            action.triggered.connect(self.handle_menu_tem_click)
+            action.triggered.connect(self.handle_menu_item_click)
             menu.addAction(action)
 
         # Show the menu
         menu.move(button.mapToGlobal(button.rect().bottomLeft()))
         menu.exec()
     
-    def handle_menu_tem_click(self):
+    def handle_menu_item_click(self):
         text = self.sender().text()
         match text:
             case "My Classes":
@@ -391,7 +412,7 @@ class MainWindow(QMainWindow):
         setattr(self.ui, newName, self.courseCardWidget)
         
         self.ui.coursesGridLayout.addWidget(self.courseCardWidget, rowNumber, columnNumber, 1, 1)
-        pass
+        
 
     def createStudentWidget(self, rowNumber, columnNumber, student_info=None):
         newName = "studentFrame" + str(rowNumber) + "_" + str(columnNumber)
@@ -399,7 +420,7 @@ class MainWindow(QMainWindow):
         self.studentCardWidget = QtWidgets.QWidget(self.ui.scrollAreaWidgetContents_5)
         self.studentCardWidget.setMaximumSize(QtCore.QSize(150, 150))
         self.studentCardWidget.setStyleSheet("background-color: rgb(255, 255, 255);")
-        self.studentCardWidget.setObjectName("studentCardWidget")
+        self.studentCardWidget.setObjectName("student" + student_info["student_id"] + "CardWidget")
         self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.studentCardWidget)
         self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_5.setSpacing(0)
@@ -410,17 +431,17 @@ class MainWindow(QMainWindow):
         self.horizontalLayout_13 = QtWidgets.QHBoxLayout(self.widget_14)
         self.horizontalLayout_13.setObjectName("horizontalLayout_13")
         self.studentNameCardLabel = QtWidgets.QLabel(self.widget_14)
-        self.studentNameCardLabel.setObjectName("studentNameCardLabel")
+        self.studentNameCardLabel.setObjectName("student" + student_info["student_id"] + "CardLabel")
         self.horizontalLayout_13.addWidget(self.studentNameCardLabel)
         spacerItem9 = QtWidgets.QSpacerItem(59, 19, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_13.addItem(spacerItem9)
         self.verticalLayout_5.addWidget(self.widget_14)
         self.widget_4 = QtWidgets.QWidget(self.studentCardWidget)
-        self.widget_4.setObjectName("widget_4")
+        self.widget_4.setObjectName(str(student_info["student_id"]) + "StudentWidget")
         self.horizontalLayout_17 = QtWidgets.QHBoxLayout(self.widget_4)
         self.horizontalLayout_17.setObjectName("horizontalLayout_17")
         self.studentCardIDLabel = QtWidgets.QLabel(self.widget_4)
-        self.studentCardIDLabel.setObjectName("studentCardIDLabel")
+        self.studentCardIDLabel.setObjectName( "student" + student_info["student_id"] + "CardIDLabel")
         self.horizontalLayout_17.addWidget(self.studentCardIDLabel)
         spacerItem10 = QtWidgets.QSpacerItem(58, 19, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_17.addItem(spacerItem10)
@@ -448,7 +469,7 @@ class MainWindow(QMainWindow):
         self.pushButton_3.setIcon(icon1)
         self.pushButton_3.setIconSize(QtCore.QSize(20, 20))
         self.pushButton_3.setAutoExclusive(True)
-        self.pushButton_3.setObjectName("pushButton_3")
+        self.pushButton_3.setObjectName("edit" + student_info["student_id"] + "Button")
         self.pushButton_3.clicked.connect(lambda: self.edit_student(student_info["student_id"]))
         self.horizontalLayout_12.addWidget(self.pushButton_3)
         self.pushButton_5 = QtWidgets.QPushButton(self.widget_13)
@@ -459,7 +480,7 @@ class MainWindow(QMainWindow):
         self.pushButton_5.setIcon(icon2)
         self.pushButton_5.setIconSize(QtCore.QSize(20, 20))
         self.pushButton_5.setAutoExclusive(True)
-        self.pushButton_5.setObjectName("pushButton_5")
+        self.pushButton_5.setObjectName("delete" + student_info["student_id"] + "Button")
         self.pushButton_5.clicked.connect(lambda: self.delete_student(student_info["student_id"]))
         self.horizontalLayout_12.addWidget(self.pushButton_5)
         self.horizontalLayout_9.addWidget(self.widget_13)

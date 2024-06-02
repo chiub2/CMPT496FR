@@ -73,7 +73,7 @@ class FaceRecognitionFirebaseDB():
             self._attendance_ref.child(key).set(value)
 
     def addCourse(self, courseDict):
-        print(courseDict)
+        # print(courseDict)
         for key, value in courseDict.items():
             self._course_ref.child(key).set(value)
 
@@ -85,19 +85,19 @@ class FaceRecognitionFirebaseDB():
         for key, value in instructorDict.items():
             self._instructor_ref.child(key).set(value)
 
-    def getStudentDB(self, studentID: str):
+    def getStudent(self, studentID: str):
         ''' Make API call to get ONE student from firebase'''
         return db.reference(f"Students/{studentID}").get()
 
-    def getInstructorDB(self, instructorID: str):
+    def getInstructor(self, instructorID: str):
         ''' Make API call to get ONE instructor from firebase'''
         return db.reference(f"Instructors/{instructorID}").get()
     
-    def getCourseDB(self, course_name: str, section_id: str):
+    def getCourse(self, course_name: str, section_id: str):
         ''' Make API call to get ONE student from firebase'''
         return db.reference(f"Courses/{course_name}-{section_id}").get()
     
-    def getAttendanceDB(self, course_name: str, section_id: str, date:str):
+    def getAttendance(self, course_name: str, section_id: str, date:str):
         ''' Make API call to get ONE student from firebase'''
         return db.reference(f"Attendance/{course_name}-{section_id}/{date}").get()
 
@@ -105,31 +105,41 @@ class FaceRecognitionFirebaseDB():
         try:
             logging.debug(f"Deleting student with ID: {student_id}")
             student_ref = self._student_ref.child(student_id)
-            student_ref.remove()  # Correct method to delete a node in Firebase Realtime Database
+            student_ref.delete()  # Correct method to delete a node in Firebase Realtime Database
             logging.info(f"Student with ID {student_id} deleted successfully.")
         except Exception as e:
             logging.error(f"Error during delete: {str(e)}")
             raise
 
     def getAllStudents(self):
-        return self._student_ref.get()
+        ret = self._student_ref.get()
+        return ret
     
     def getAllCourses(self):
         return self._course_ref.get()
 
-    def updateStudentData(self, studentID: str, newStudentData: dict):
-        student_info = self.getStudentDB(studentID)
-        for key in newStudentData.keys():
-            try:
-                student_info[key] = newStudentData[key]
-                ref = db.reference(f"Students/{studentID}")
-                ref.child(key).set(student_info[key])
-            except Exception as e:
-                logging.error(f"Error updating student data: {str(e)}")
-                pass
+    def updateStudent(self, studentID: str, oldID: int, newStudentData: dict):
+        student_info = self.getStudent(studentID)
+        if "student_id" in newStudentData.keys(): # changing student id as well
+            values = self.getStudent(oldID)
+            self.deleteStudent(values["student_id"])
+            values["student_id"] = newStudentData["student_id"]
+            for key in newStudentData.keys():
+                values[key] = newStudentData[key]
+            self.addStudent({values["student_id"]: values})
+        
+        else:
+            for key in newStudentData.keys():
+                try:
+                    student_info[key] = newStudentData[key]
+                    ref = db.reference(f"Students/{studentID}")
+                    ref.child(key).set(student_info[key])
+                except Exception as e:
+                    logging.error(f"Error updating student data: {str(e)}")
+                    pass
 
     def updateInstructorData(self, instructorID: str, newInstructorData: dict, fields: list):
-        instructor_info = self.getInstructorDB(instructorID)
+        instructor_info = self.getInstructor(instructorID)
         for key, value in newInstructorData.items():
             try:
                 instructor_info[key] = value
@@ -165,7 +175,7 @@ if __name__ == '__main__':
         }
     }
     testDB.addCourse(courseDict=course_data)
-    testPull = testDB.getCourseDB("CMPT101", "AS01")
+    testPull = testDB.getCourse("CMPT101", "AS01")
     
     print(testPull)
 
@@ -173,7 +183,7 @@ if __name__ == '__main__':
         "CMPT101-AS01/2024-05-30": [1,2,3,4,5,6,7,8,9]
     }
     testDB.addAttendance(attendance_data)
-    testPull = testDB.getAttendanceDB("CMPT101", "AS01", "2024-05-30")
+    testPull = testDB.getAttendance("CMPT101", "AS01", "2024-05-30")
     
     print(testPull)
     # student_data = {
@@ -206,7 +216,7 @@ if __name__ == '__main__':
     #     }
     # })
     # testDB.updateStudentData("3101003", {"major": "Music", "minor": "Rap studies"})
-    # cardiTest = testDB.getStudentDB("3101003")
+    # cardiTest = testDB.getStudent("3101003")
     # print(cardiTest)
 
     # testDB.addInstructor(instructor_data)
