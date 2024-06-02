@@ -56,7 +56,8 @@ class FaceRecognitionFirebaseDB():
         }
         '''
         self._attendance_ref = db.reference('Attendance')
-        ''' Course Data format
+        ''' Course Data format - list of students correspond to students that were
+                                 present for that class, section and for that date
         {
             "CourseName-sectionID/Date": [studentID1, studentID2, studentID3 ... studentIDn]
             }

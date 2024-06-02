@@ -273,6 +273,16 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_16.addItem(self.horizontalSpacer_6)
 
+        self.addStudentButton_3 = QPushButton(self.widget_17)
+        self.addStudentButton_3.setObjectName(u"addStudentButton_3")
+        self.addStudentButton_3.setMaximumSize(QSize(100, 100))
+        icon1 = QIcon()
+        icon1.addFile(u":/blackIcons/BlackIcons/plus.svg", QSize(), QIcon.Normal, QIcon.Off)
+        self.addStudentButton_3.setIcon(icon1)
+        self.addStudentButton_3.setIconSize(QSize(70, 70))
+
+        self.horizontalLayout_16.addWidget(self.addStudentButton_3)
+
 
         self.verticalLayout_20.addWidget(self.widget_17)
 
@@ -292,14 +302,19 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_17.addWidget(self.lineEdit_3)
 
-        self.pushButton_3 = QPushButton(self.widget_18)
-        self.pushButton_3.setObjectName(u"pushButton_3")
+        self.studentSearchButton = QPushButton(self.widget_18)
+        self.studentSearchButton.setObjectName(u"studentSearchButton")
 
-        self.horizontalLayout_17.addWidget(self.pushButton_3)
+        self.horizontalLayout_17.addWidget(self.studentSearchButton)
 
         self.horizontalSpacer_14 = QSpacerItem(818, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_17.addItem(self.horizontalSpacer_14)
+
+        self.refreshbutton = QPushButton(self.widget_18)
+        self.refreshbutton.setObjectName(u"refreshbutton")
+
+        self.horizontalLayout_17.addWidget(self.refreshbutton)
 
 
         self.verticalLayout_20.addWidget(self.widget_18)
@@ -316,21 +331,11 @@ class Ui_MainWindow(object):
         self.scrollArea_4.setWidgetResizable(True)
         self.scrollAreaWidgetContents_5 = QWidget()
         self.scrollAreaWidgetContents_5.setObjectName(u"scrollAreaWidgetContents_5")
-        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 1144, 543))
+        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 1144, 488))
         self.gridLayout_3 = QGridLayout(self.scrollAreaWidgetContents_5)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.studentsViewGridLayout = QGridLayout()
         self.studentsViewGridLayout.setObjectName(u"studentsViewGridLayout")
-        self.pushButton_4 = QPushButton(self.scrollAreaWidgetContents_5)
-        self.pushButton_4.setObjectName(u"pushButton_4")
-        self.pushButton_4.setMaximumSize(QSize(100, 100))
-        icon1 = QIcon()
-        icon1.addFile(u":/blackIcons/BlackIcons/plus.svg", QSize(), QIcon.Normal, QIcon.Off)
-        self.pushButton_4.setIcon(icon1)
-        self.pushButton_4.setIconSize(QSize(70, 70))
-
-        self.studentsViewGridLayout.addWidget(self.pushButton_4, 0, 0, 1, 1)
-
 
         self.gridLayout_3.addLayout(self.studentsViewGridLayout, 0, 0, 1, 1)
 
@@ -402,6 +407,15 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_10.addItem(self.horizontalSpacer_7)
 
+        self.addCourseButton = QPushButton(self.widget_7)
+        self.addCourseButton.setObjectName(u"addCourseButton")
+        self.addCourseButton.setMaximumSize(QSize(16777215, 100))
+        self.addCourseButton.setIcon(icon1)
+        self.addCourseButton.setIconSize(QSize(30, 30))
+        self.addCourseButton.setAutoExclusive(True)
+
+        self.horizontalLayout_10.addWidget(self.addCourseButton)
+
 
         self.verticalLayout_11.addWidget(self.widget_7)
 
@@ -445,7 +459,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 1144, 500))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 1144, 491))
         self.horizontalLayout_11 = QHBoxLayout(self.scrollAreaWidgetContents_2)
         self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
         self.coursesGridLayout = QGridLayout()
@@ -457,14 +471,6 @@ class Ui_MainWindow(object):
         self.addCourseButtonWidget.setMaximumSize(QSize(150, 120))
         self.verticalLayout_13 = QVBoxLayout(self.addCourseButtonWidget)
         self.verticalLayout_13.setObjectName(u"verticalLayout_13")
-        self.addCourseButton = QPushButton(self.addCourseButtonWidget)
-        self.addCourseButton.setObjectName(u"addCourseButton")
-        self.addCourseButton.setMaximumSize(QSize(16777215, 100))
-        self.addCourseButton.setIcon(icon1)
-        self.addCourseButton.setIconSize(QSize(50, 50))
-
-        self.verticalLayout_13.addWidget(self.addCourseButton)
-
 
         self.coursesGridLayout.addWidget(self.addCourseButtonWidget, 0, 0, 1, 1)
 
@@ -597,7 +603,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(4)
+        self.stackedWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -614,14 +620,15 @@ class Ui_MainWindow(object):
         self.takeAttendanceButton.setText(QCoreApplication.translate("MainWindow", u"Take Attendance", None))
         self.sortByButton.setText(QCoreApplication.translate("MainWindow", u"Sort by:", None))
         self.label_15.setText(QCoreApplication.translate("MainWindow", u"Your Students", None))
+        self.addStudentButton_3.setText("")
         self.lineEdit_3.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Find Student ...", None))
-        self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"Search", None))
-        self.pushButton_4.setText("")
-        self.label_5.setText(QCoreApplication.translate("MainWindow", u"Your Dashboard", None))
+        self.studentSearchButton.setText(QCoreApplication.translate("MainWindow", u"Search", None))
+        self.refreshbutton.setText(QCoreApplication.translate("MainWindow", u"Refresh", None))
+        self.label_5.setText(QCoreApplication.translate("MainWindow", u"Dashboard", None))
         self.lineEdit.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Find Course ...", None))
         self.pushButton.setText(QCoreApplication.translate("MainWindow", u"Search", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"Your Classes:", None))
         self.addCourseButton.setText("")
+        self.label.setText(QCoreApplication.translate("MainWindow", u"Your Classes:", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Reports", None))
         self.label_10.setText(QCoreApplication.translate("MainWindow", u"User Name", None))
         self.label_11.setText(QCoreApplication.translate("MainWindow", u"DOB", None))
