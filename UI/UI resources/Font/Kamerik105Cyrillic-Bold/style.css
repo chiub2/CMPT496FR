@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'Kamerik 105';
+    src: local('Kamerik 105 Bold'), local('Kamerik-105-Bold'),
+        url('Kamerik105Cyrillic-Bold.woff2') format('woff2'),
+        url('Kamerik105Cyrillic-Bold.woff') format('woff'),
+        url('Kamerik105Cyrillic-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+  }

@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFrame, QAction, QMenu, Q
 from PyQt5.QtGui import *
 import numpy as np
 from AddStudentDialog import AddStudentDialog
+from AddCourseDialog import AddCourseDialog
 from mainWindowInterface import *
 import testCaptureUI
 from AddDataToDatabase import FaceRecognitionFirebaseDB
@@ -22,6 +23,13 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.db = FaceRecognitionFirebaseDB()   #-----> db here
         self.ui.setupUi(self)
+
+
+        #Change default Font
+        QFontDatabase.addApplicationFont("UI/Font/Kamerik105Cyrillic-Bold.ttf")
+        custom_font = QFont("Kamerik105Cyrillic-Bold")
+        # custom_font.setWeight(18)
+        QApplication.setFont(custom_font, "QLabel")
         # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         # self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
@@ -30,14 +38,13 @@ class MainWindow(QMainWindow):
 
         self.show()
 
-        # self.createNewWidgets(0, 0)
-        # FOR loop
-        # 10 rows
-        for x in range(0,10):
-            # columns
-            for y in range(0,3):
-                self.createStudentWidget(x, y)
-                self.createCourseWidget(x, y)
+        # # self.createNewWidgets(0, 0)
+        # # FOR loop
+        # # 10 rows
+        # for x in range(0,10):
+        #     # columns
+        #     for y in range(0,3):
+        #         self.createStudentWidget(x, y)
 
         
         # Search for students
@@ -46,10 +53,18 @@ class MainWindow(QMainWindow):
         # Adding students to DataBase
         self.ui.addStudentButton_3.clicked.connect(self.show_add_student_dialog)
 
+        
+
         # Refreshing student data
         self.ui.refreshbutton.clicked.connect(self.refresh_student_data)
+        self.refresh_student_data()
 
         self.ui.takeAttendanceButton.clicked.connect(self.launchCapture)
+
+        # Adding Course to DataBase
+        self.ui.addCourseButton.clicked.connect(self.show_add_course_dialog)
+
+
         self.show()
 
         
@@ -72,6 +87,48 @@ class MainWindow(QMainWindow):
         #set default screen
         self.switchToManageCoursesPage()
 
+
+#===================================================Adding Courses to Database
+    def show_add_course_dialog(self):
+        dialog = AddCourseDialog()
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            course_data = dialog.get_course_data()
+            self.add_course_to_db(course_data)
+    
+    def add_course_to_db(self, course_data):
+        course_data["students"] = [0]   #-----> student 0 doesn't exist
+        course_name = course_data["course_name"]
+        section_id = course_data["section_id"]
+        course_dict = {f"{course_name}-{section_id}": course_data}
+        print(course_dict)
+        self.db.addCourse(course_dict)
+        QMessageBox.information(self, "Success", "Course added successfully!")
+        self.refresh_course_data()
+
+    def refresh_course_data(self):
+        try:
+            print(20000)
+            for i in reversed(range(self.ui.coursesGridLayout.count())):
+                widget = self.ui.coursesGridLayout.itemAt(i).widget()
+                if widget is not None:
+                    widget.setParent(None)
+
+            courses = self.db.getAllCourses()
+            print(courses)
+            row = 0
+            col = 0
+            for course_name_sec_id, course_info in courses.items():
+                self.createCourseWidget(row, col, course_info)
+                col += 1
+                if col == 3:
+                    col = 0
+                    row += 1
+        except Exception as e:
+            print(f"Error during refresh: {e}")
+
+
+
+#===================================================Adding students to Database
 
     def search_student(self):
         try:
@@ -106,8 +163,10 @@ class MainWindow(QMainWindow):
             student_data = dialog.get_student_data()
             self.add_student_to_db(student_data)
 
+
+
     def add_student_to_db(self, student_data):
-        student_id = student_data.pop("student_id")
+        student_id = student_data["student_id"]
         student_dict = {student_id: student_data}
         self.db.addStudent(student_dict)
         QMessageBox.information(self, "Success", "Student added successfully!")
@@ -123,22 +182,42 @@ class MainWindow(QMainWindow):
             students = self.db.getAllStudents()
             row = 0
             col = 0
-            for student_id, student_info in students.items():
-                self.createStudentWidget(row, col, student_info)
-                col += 1
-                if col == 3:
-                    col = 0
-                    row += 1
+            print(students)
+            '''
+            Some extremely weird behaviour going on here, if database is empty and user adds a student,
+            students will be of instance list, but if database is not empty and user adds or edits a student,
+            database will be of type dictionary
+
+
+            ---> temp fix, check for instance of students and execute approprriate algorithm
+            '''
+            if isinstance(students, list):
+                if students != None:
+                    for student in students:
+                        if student != None:
+                            self.createStudentWidget(row, col, student)
+                            col += 1
+                            if col == 3:
+                                col = 0
+                                row += 1
+            elif isinstance(students, dict):
+                for student_id, student_info in students.items():
+                    self.createStudentWidget(row, col, student_info)
+                    col += 1
+                    if col == 3:
+                        col = 0
+                        row += 1
         except Exception as e:
             print(f"Error during refresh: {e}")
 
     def edit_student(self, student_id):
         try:
             student_data = self.db.getStudent(student_id)
+            oldID = student_data["student_id"]
             dialog = AddStudentDialog(student_data)
             if dialog.exec_() == QtWidgets.QDialog.Accepted:
                 updated_data = dialog.get_student_data()
-                self.db.updateStudent(student_id, updated_data)
+                self.db.updateStudent(student_id, oldID, updated_data)
                 self.refresh_student_data()
         except Exception as e:
             print(f"Error during edit: {e}")
@@ -187,14 +266,14 @@ class MainWindow(QMainWindow):
         #Add actions to the menu
         for item_text in menu_items:
             action = QAction(item_text, self)
-            action.triggered.connect(self.handle_menu_tem_click)
+            action.triggered.connect(self.handle_menu_item_click)
             menu.addAction(action)
 
         # Show the menu
         menu.move(button.mapToGlobal(button.rect().bottomLeft()))
         menu.exec()
     
-    def handle_menu_tem_click(self):
+    def handle_menu_item_click(self):
         text = self.sender().text()
         match text:
             case "My Classes":
@@ -236,7 +315,7 @@ class MainWindow(QMainWindow):
         testCaptureUI.launch()
 
 
-    def createCourseWidget(self, rowNumber, columnNumber):
+    def createCourseWidget(self, rowNumber, columnNumber, course_info = None):
         
         # CREATE NEW UNIQUE NAMES FOR THE WIDGETS ---> dev check. REMOVE BEFORE DEPLOY
         newName = "frame" + str(rowNumber) + "_" + str(columnNumber)
@@ -314,8 +393,14 @@ class MainWindow(QMainWindow):
 
         #retranslate functions
         _translate = QtCore.QCoreApplication.translate
-        self.courseNameCardLabel.setText(_translate("MainWindow", "Course Name"))
-        self.courseCardSectionLabel.setText(_translate("MainWindow", "Section Name"))
+        if course_info == None:
+            self.courseNameCardLabel.setText(_translate("MainWindow", "Course Name"))
+            self.courseCardSectionLabel.setText(_translate("MainWindow", "Section Name"))
+        else:
+            self.courseNameCardLabel.setText(_translate("MainWindow", course_info["course_name"]))
+            self.courseCardSectionLabel.setText(_translate("MainWindow", course_info["section_id"]))
+            
+        
         
         
         # Create new attribute to Ui_Mainwindow
@@ -327,7 +412,7 @@ class MainWindow(QMainWindow):
         setattr(self.ui, newName, self.courseCardWidget)
         
         self.ui.coursesGridLayout.addWidget(self.courseCardWidget, rowNumber, columnNumber, 1, 1)
-        pass
+        
 
     def createStudentWidget(self, rowNumber, columnNumber, student_info=None):
         newName = "studentFrame" + str(rowNumber) + "_" + str(columnNumber)
@@ -335,7 +420,7 @@ class MainWindow(QMainWindow):
         self.studentCardWidget = QtWidgets.QWidget(self.ui.scrollAreaWidgetContents_5)
         self.studentCardWidget.setMaximumSize(QtCore.QSize(150, 150))
         self.studentCardWidget.setStyleSheet("background-color: rgb(255, 255, 255);")
-        self.studentCardWidget.setObjectName("studentCardWidget")
+        self.studentCardWidget.setObjectName("student" + student_info["student_id"] + "CardWidget")
         self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.studentCardWidget)
         self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_5.setSpacing(0)
@@ -346,17 +431,17 @@ class MainWindow(QMainWindow):
         self.horizontalLayout_13 = QtWidgets.QHBoxLayout(self.widget_14)
         self.horizontalLayout_13.setObjectName("horizontalLayout_13")
         self.studentNameCardLabel = QtWidgets.QLabel(self.widget_14)
-        self.studentNameCardLabel.setObjectName("studentNameCardLabel")
+        self.studentNameCardLabel.setObjectName("student" + student_info["student_id"] + "CardLabel")
         self.horizontalLayout_13.addWidget(self.studentNameCardLabel)
         spacerItem9 = QtWidgets.QSpacerItem(59, 19, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_13.addItem(spacerItem9)
         self.verticalLayout_5.addWidget(self.widget_14)
         self.widget_4 = QtWidgets.QWidget(self.studentCardWidget)
-        self.widget_4.setObjectName("widget_4")
+        self.widget_4.setObjectName(str(student_info["student_id"]) + "StudentWidget")
         self.horizontalLayout_17 = QtWidgets.QHBoxLayout(self.widget_4)
         self.horizontalLayout_17.setObjectName("horizontalLayout_17")
         self.studentCardIDLabel = QtWidgets.QLabel(self.widget_4)
-        self.studentCardIDLabel.setObjectName("studentCardIDLabel")
+        self.studentCardIDLabel.setObjectName( "student" + student_info["student_id"] + "CardIDLabel")
         self.horizontalLayout_17.addWidget(self.studentCardIDLabel)
         spacerItem10 = QtWidgets.QSpacerItem(58, 19, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_17.addItem(spacerItem10)
@@ -384,7 +469,7 @@ class MainWindow(QMainWindow):
         self.pushButton_3.setIcon(icon1)
         self.pushButton_3.setIconSize(QtCore.QSize(20, 20))
         self.pushButton_3.setAutoExclusive(True)
-        self.pushButton_3.setObjectName("pushButton_3")
+        self.pushButton_3.setObjectName("edit" + student_info["student_id"] + "Button")
         self.pushButton_3.clicked.connect(lambda: self.edit_student(student_info["student_id"]))
         self.horizontalLayout_12.addWidget(self.pushButton_3)
         self.pushButton_5 = QtWidgets.QPushButton(self.widget_13)
@@ -395,7 +480,7 @@ class MainWindow(QMainWindow):
         self.pushButton_5.setIcon(icon2)
         self.pushButton_5.setIconSize(QtCore.QSize(20, 20))
         self.pushButton_5.setAutoExclusive(True)
-        self.pushButton_5.setObjectName("pushButton_5")
+        self.pushButton_5.setObjectName("delete" + student_info["student_id"] + "Button")
         self.pushButton_5.clicked.connect(lambda: self.delete_student(student_info["student_id"]))
         self.horizontalLayout_12.addWidget(self.pushButton_5)
         self.horizontalLayout_9.addWidget(self.widget_13)
@@ -412,15 +497,6 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    sys.exit(app.exec_())
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-
-    #testDB = DB("testDB")
     app = QApplication(sys.argv)
     window = MainWindow()
     sys.exit(app.exec_())

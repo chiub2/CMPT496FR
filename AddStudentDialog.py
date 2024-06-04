@@ -7,23 +7,32 @@ from firebase_admin import credentials, db, storage
 
 
 class AddStudentDialog(QtWidgets.QDialog):
-    def __init__(self):
+    def __init__(self, param = None):
         super().__init__()
         self.setWindowTitle("Add Student")
 
         self.layout = QtWidgets.QFormLayout()
-
+        
         self.student_id = QtWidgets.QLineEdit()
         self.full_name = QtWidgets.QLineEdit()
         self.major = QtWidgets.QLineEdit()
         self.minor = QtWidgets.QLineEdit()
         self.total_attendance = QtWidgets.QSpinBox()
 
+        
         self.layout.addRow("Student ID:", self.student_id)
         self.layout.addRow("Full Name:", self.full_name)
         self.layout.addRow("Major:", self.major)
         self.layout.addRow("Minor:", self.minor)
         self.layout.addRow("Total Attendance:", self.total_attendance)
+
+        if param != None:
+            self.student_id.setText(param["student_id"])
+            self.full_name.setText(param["full_name"])
+            self.major.setText(param["major"])
+            self.minor.setText(param["minor"])
+            self.total_attendance.setValue(param["total_attendance"])
+                
 
         self.buttons = QtWidgets.QDialogButtonBox(
             QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
