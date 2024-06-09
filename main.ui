@@ -20,22 +20,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <property name="spacing">
-     <number>0</number>
-    </property>
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
+   <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
      <widget class="QWidget" name="widget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -403,6 +388,62 @@ QPushButton:hover{
            </item>
           </layout>
          </widget>
+         <widget class="QWidget" name="attendanceCapturePage">
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <item>
+            <widget class="QWidget" name="widget_9" native="true">
+             <layout class="QVBoxLayout" name="verticalLayout_12">
+              <item>
+               <widget class="QWidget" name="widget_10" native="true">
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgb(210, 219, 255);</string>
+                </property>
+                <widget class="QLabel" name="label_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>530</x>
+                   <y>250</y>
+                   <width>111</width>
+                   <height>16</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Camera window in here</string>
+                 </property>
+                </widget>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="widget_11" native="true">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>100</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgb(216, 255, 252);</string>
+                </property>
+                <widget class="QLabel" name="label_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>530</x>
+                   <y>40</y>
+                   <width>111</width>
+                   <height>16</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Anything else in here</string>
+                 </property>
+                </widget>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
          <widget class="QWidget" name="manageStudentsPage">
           <layout class="QVBoxLayout" name="verticalLayout_9">
            <item>
@@ -624,7 +665,7 @@ QPushButton:hover{
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="pushButton">
+                     <widget class="QPushButton" name="searchCoursesButton">
                       <property name="text">
                        <string>Search</string>
                       </property>
@@ -707,6 +748,13 @@ QPushButton:hover{
                       </property>
                      </spacer>
                     </item>
+                    <item>
+                     <widget class="QPushButton" name="refreshCoursesButton">
+                      <property name="text">
+                       <string>Refresh</string>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
                   </widget>
                  </item>
@@ -734,29 +782,18 @@ QPushButton:hover{
                       <x>0</x>
                       <y>0</y>
                       <width>1144</width>
-                      <height>491</height>
+                      <height>488</height>
                      </rect>
                     </property>
                     <layout class="QHBoxLayout" name="horizontalLayout_11">
                      <item>
-                      <layout class="QGridLayout" name="coursesGridLayout" rowminimumheight="0" columnminimumwidth="0">
+                      <layout class="QGridLayout" name="coursesGridLayout">
                        <property name="sizeConstraint">
                         <enum>QLayout::SetFixedSize</enum>
                        </property>
                        <property name="spacing">
                         <number>10</number>
                        </property>
-                       <item row="0" column="0">
-                        <widget class="QWidget" name="addCourseButtonWidget" native="true">
-                         <property name="maximumSize">
-                          <size>
-                           <width>150</width>
-                           <height>120</height>
-                          </size>
-                         </property>
-                         <layout class="QVBoxLayout" name="verticalLayout_13"/>
-                        </widget>
-                       </item>
                       </layout>
                      </item>
                     </layout>

@@ -36,7 +36,6 @@ class MainWindow(QMainWindow):
         # Create initial student widgets
         self.refresh_student_data()
 
-        self.show()
 
         # # self.createNewWidgets(0, 0)
         # # FOR loop
@@ -55,15 +54,21 @@ class MainWindow(QMainWindow):
 
         
 
-        # Refreshing student data
+        # Connection student refresh button data
         self.ui.refreshbutton.clicked.connect(self.refresh_student_data)
-        self.refresh_student_data()
+
+        self.ui.searchCoursesButton.clicked.connect(self.search_courses)
+        
 
         self.ui.takeAttendanceButton.clicked.connect(self.launchCapture)
 
         # Adding Course to DataBase
         self.ui.addCourseButton.clicked.connect(self.show_add_course_dialog)
+        self.ui.refreshCoursesButton.clicked.connect(self.refresh_course_data)
 
+        #refreshing data
+        self.refresh_student_data()
+        self.refresh_course_data()
 
         self.show()
 
@@ -96,7 +101,7 @@ class MainWindow(QMainWindow):
             self.add_course_to_db(course_data)
     
     def add_course_to_db(self, course_data):
-        course_data["students"] = [0]   #-----> student 0 doesn't exist
+        course_data["students"] = [0]   #-----> student 0 doesn't exist //needed so student list is not empty
         course_name = course_data["course_name"]
         section_id = course_data["section_id"]
         course_dict = {f"{course_name}-{section_id}": course_data}
@@ -107,25 +112,103 @@ class MainWindow(QMainWindow):
 
     def refresh_course_data(self):
         try:
-            print(20000)
             for i in reversed(range(self.ui.coursesGridLayout.count())):
                 widget = self.ui.coursesGridLayout.itemAt(i).widget()
                 if widget is not None:
                     widget.setParent(None)
 
             courses = self.db.getAllCourses()
-            print(courses)
             row = 0
             col = 0
-            for course_name_sec_id, course_info in courses.items():
-                self.createCourseWidget(row, col, course_info)
-                col += 1
-                if col == 3:
-                    col = 0
-                    row += 1
+            print(courses)
+            '''
+            Some extremely weird behaviour going on here, if database is empty and user adds a student,
+            students will be of instance list, but if database is not empty and user adds or edits a student,
+            database will be of type dictionary
+
+
+            ---> temp fix, check for instance of courses and execute approprriate algorithm
+            '''
+            if isinstance(courses, list):
+                if courses != None:
+                    for course in courses:
+                        if course != None:
+                            self.createCourseWidget(row, col, course)
+                            col += 1
+                            if col == 3:
+                                col = 0
+                                row += 1
+            elif isinstance(courses, dict):
+                for course_name, course_info in courses.items():
+                    self.createCourseWidget(row, col, course_info)
+                    col += 1
+                    if col == 3:
+                        col = 0
+                        row += 1
+            elif courses == None:
+                return
+            
         except Exception as e:
             print(f"Error during refresh: {e}")
 
+    
+    def edit_course(self, course_name, section_id):
+        try:
+            course_data = self.db.getCourse(course_name, section_id)
+            old_course_name = course_data["course_name"]
+            old_section_id = course_data["section_id"]
+            dialog = AddCourseDialog(course_data)
+            if dialog.exec_() == QtWidgets.QDialog.Accepted:
+                updated_data = dialog.get_course_data()
+                self.db.updateCourseData(updated_data["course_name"],updated_data["section_id"], old_course_name, old_section_id, updated_data)
+                self.refresh_course_data()
+        except Exception as e:
+            print(f"Error during edit: {e}")
+
+    def delete_course(self, course_name, section_id):
+        try:
+            reply = QMessageBox.question(self, 'Delete Student', f"Are you sure you want to delete the course with ID: {course_name}-{section_id}?",
+                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                print(f"Attempting to delete course with ID: {course_name}-{section_id}")
+                logging.debug(f"Attempting to delete course with ID: {course_name}-{section_id}")
+                self.db.deleteCourse(course_name, section_id)
+                self.refresh_course_data()
+                print(f"Course with ID {course_name}-{section_id} deleted successfully.")
+        except Exception as e:
+            print(f"Error during delete: {e}")
+            logging.error(f"Error during delete: {e}")
+            QMessageBox.critical(self, "Error", f"An error occurred while deleting the Course: {str(e)}")
+
+
+#=====================================================================================searching for courses
+            
+    def search_courses(self):
+        try:
+            search_text = self.ui.lineEdit.text().lower()
+            allcourses = self.db.getAllCourses()
+            filtered_courses = {course_id: data for course_id, data in allcourses.items() if search_text in data.get("course_name", "").lower() or search_text in course_id.lower()}
+            self.populate_courses_grid(filtered_courses)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred during search: {str(e)}")
+
+    def populate_courses_grid(self, courses=None):
+        if courses is None:
+            courses = self.db.getAllCourses()
+
+        for i in reversed(range(self.ui.coursesGridLayout.count())):
+            widget = self.ui.coursesGridLayout.itemAt(i).widget()
+            if widget is not None:
+                widget.setParent(None)
+
+        row = 0
+        col = 0
+        for course_info in courses.values():
+            self.createCourseWidget(row, col, course_info)
+            col += 1
+            if col == 3:
+                col = 0
+                row += 1
 
 
 #===================================================Adding students to Database
@@ -258,7 +341,7 @@ class MainWindow(QMainWindow):
                            
 
                            QMenu:selected{
-                           back-ground-color:white;
+                           background-color:white;
                            color: #12B298;
                            }
                            """)
@@ -318,7 +401,7 @@ class MainWindow(QMainWindow):
     def createCourseWidget(self, rowNumber, columnNumber, course_info = None):
         
         # CREATE NEW UNIQUE NAMES FOR THE WIDGETS ---> dev check. REMOVE BEFORE DEPLOY
-        newName = "frame" + str(rowNumber) + "_" + str(columnNumber)
+        newName = "frame" + course_info["course_name"]
 
         print(newName)
 
@@ -376,6 +459,7 @@ class MainWindow(QMainWindow):
         self.pushButton_3.setIconSize(QtCore.QSize(20, 20))
         self.pushButton_3.setAutoExclusive(True)
         self.pushButton_3.setObjectName("pushButton_3")
+        self.pushButton_3.clicked.connect(lambda: self.edit_course(course_info["course_name"], course_info["section_id"]))
         self.horizontalLayout_12.addWidget(self.pushButton_3)
         self.pushButton_5 = QtWidgets.QPushButton(self.widget_13)
         self.pushButton_5.setText("")
@@ -386,6 +470,7 @@ class MainWindow(QMainWindow):
         self.pushButton_5.setIconSize(QtCore.QSize(20, 20))
         self.pushButton_5.setAutoExclusive(True)
         self.pushButton_5.setObjectName("pushButton_5")
+        self.pushButton_5.clicked.connect(lambda: self.delete_course(course_info["course_name"], course_info["section_id"]))
         self.horizontalLayout_12.addWidget(self.pushButton_5)
         self.horizontalLayout_9.addWidget(self.widget_13)
         self.verticalLayout_5.addWidget(self.widget_12)
@@ -415,7 +500,7 @@ class MainWindow(QMainWindow):
         
 
     def createStudentWidget(self, rowNumber, columnNumber, student_info=None):
-        newName = "studentFrame" + str(rowNumber) + "_" + str(columnNumber)
+        newName = "studentFrame" + student_info["student_id"]
 
         self.studentCardWidget = QtWidgets.QWidget(self.ui.scrollAreaWidgetContents_5)
         self.studentCardWidget.setMaximumSize(QtCore.QSize(150, 150))

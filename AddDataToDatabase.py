@@ -111,6 +111,16 @@ class FaceRecognitionFirebaseDB():
             logging.error(f"Error during delete: {str(e)}")
             raise
 
+    def deleteCourse(self, course_name, section_id):
+        try:
+            logging.debug(f"Deleting Course with ID: {course_name}-{section_id}")
+            course_ref = self._course_ref.child(f"{course_name}-{section_id}")
+            course_ref.delete()  # Correct method to delete a node in Firebase Realtime Database
+            logging.info(f"Course with ID {course_name}-{section_id} deleted successfully.")
+        except Exception as e:
+            logging.error(f"Error during delete: {str(e)}")
+            raise
+
     def getAllStudents(self):
         ret = self._student_ref.get()
         return ret
@@ -118,9 +128,31 @@ class FaceRecognitionFirebaseDB():
     def getAllCourses(self):
         return self._course_ref.get()
 
+    def updateCourseData(self, course_name: str, section_id:str, oldCourseID: str, old_section_id:str, newCourseData: dict):
+        try:
+            if course_name != oldCourseID or section_id != old_section_id: # changing course and or section id(s) as well
+                values = self.getCourse(oldCourseID, old_section_id)
+                self.deleteCourse(values["course_name"], values["section_id"])
+                for key in newCourseData.keys():
+                    values[key] = newCourseData[key]
+                self.addCourse({f"{course_name}-{section_id}": values})
+            
+            else:
+                ref = db.reference(f"Courses/{course_name}-{section_id}")
+                for key in newCourseData.keys():
+                    try:
+                        ref.child(key).set(newCourseData[key])
+                    except Exception as e:
+                        logging.error(f"Error updating student data: {str(e)}")
+                        pass
+        except Exception as e:
+            print("An error occured during deletion: ", e)
+            return
+    
+
     def updateStudent(self, studentID: str, oldID: int, newStudentData: dict):
         student_info = self.getStudent(studentID)
-        if "student_id" in newStudentData.keys(): # changing student id as well
+        if studentID != oldID: # "student_id" in newStudentData.keys(): # changing student id as well
             values = self.getStudent(oldID)
             self.deleteStudent(values["student_id"])
             values["student_id"] = newStudentData["student_id"]
@@ -129,11 +161,10 @@ class FaceRecognitionFirebaseDB():
             self.addStudent({values["student_id"]: values})
         
         else:
+            ref = db.reference(f"Students/{studentID}")
             for key in newStudentData.keys():
                 try:
-                    student_info[key] = newStudentData[key]
-                    ref = db.reference(f"Students/{studentID}")
-                    ref.child(key).set(student_info[key])
+                    ref.child(key).set(newStudentData[key])
                 except Exception as e:
                     logging.error(f"Error updating student data: {str(e)}")
                     pass
