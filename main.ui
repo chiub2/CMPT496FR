@@ -200,7 +200,7 @@ QPushButton:hover{
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="attendancePage">
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -624,7 +624,7 @@ QPushButton:hover{
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="pushButton">
+                     <widget class="QPushButton" name="searchCoursesButton">
                       <property name="text">
                        <string>Search</string>
                       </property>
@@ -707,6 +707,13 @@ QPushButton:hover{
                       </property>
                      </spacer>
                     </item>
+                    <item>
+                     <widget class="QPushButton" name="refreshCoursesButton">
+                      <property name="text">
+                       <string>Refresh</string>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
                   </widget>
                  </item>
@@ -734,29 +741,18 @@ QPushButton:hover{
                       <x>0</x>
                       <y>0</y>
                       <width>1144</width>
-                      <height>491</height>
+                      <height>488</height>
                      </rect>
                     </property>
                     <layout class="QHBoxLayout" name="horizontalLayout_11">
                      <item>
-                      <layout class="QGridLayout" name="coursesGridLayout" rowminimumheight="0" columnminimumwidth="0">
+                      <layout class="QGridLayout" name="coursesGridLayout">
                        <property name="sizeConstraint">
                         <enum>QLayout::SetFixedSize</enum>
                        </property>
                        <property name="spacing">
                         <number>10</number>
                        </property>
-                       <item row="0" column="0">
-                        <widget class="QWidget" name="addCourseButtonWidget" native="true">
-                         <property name="maximumSize">
-                          <size>
-                           <width>150</width>
-                           <height>120</height>
-                          </size>
-                         </property>
-                         <layout class="QVBoxLayout" name="verticalLayout_13"/>
-                        </widget>
-                       </item>
                       </layout>
                      </item>
                     </layout>
