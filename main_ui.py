@@ -30,10 +30,8 @@ class Ui_MainWindow(object):
         MainWindow.setMinimumSize(QSize(1200, 500))
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.horizontalLayout = QHBoxLayout(self.centralwidget)
-        self.horizontalLayout.setSpacing(0)
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_5 = QVBoxLayout(self.centralwidget)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.widget = QWidget(self.centralwidget)
         self.widget.setObjectName(u"widget")
         self.verticalLayout = QVBoxLayout(self.widget)
@@ -248,6 +246,37 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addWidget(self.scrollArea)
 
         self.stackedWidget.addWidget(self.attendancePage)
+        self.attendanceCapturePage = QWidget()
+        self.attendanceCapturePage.setObjectName(u"attendanceCapturePage")
+        self.horizontalLayout_9 = QHBoxLayout(self.attendanceCapturePage)
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.widget_9 = QWidget(self.attendanceCapturePage)
+        self.widget_9.setObjectName(u"widget_9")
+        self.verticalLayout_12 = QVBoxLayout(self.widget_9)
+        self.verticalLayout_12.setObjectName(u"verticalLayout_12")
+        self.widget_10 = QWidget(self.widget_9)
+        self.widget_10.setObjectName(u"widget_10")
+        self.widget_10.setStyleSheet(u"background-color: rgb(210, 219, 255);")
+        self.label_2 = QLabel(self.widget_10)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setGeometry(QRect(530, 250, 111, 16))
+
+        self.verticalLayout_12.addWidget(self.widget_10)
+
+        self.widget_11 = QWidget(self.widget_9)
+        self.widget_11.setObjectName(u"widget_11")
+        self.widget_11.setMaximumSize(QSize(16777215, 100))
+        self.widget_11.setStyleSheet(u"background-color: rgb(216, 255, 252);")
+        self.label_6 = QLabel(self.widget_11)
+        self.label_6.setObjectName(u"label_6")
+        self.label_6.setGeometry(QRect(530, 40, 111, 16))
+
+        self.verticalLayout_12.addWidget(self.widget_11)
+
+
+        self.horizontalLayout_9.addWidget(self.widget_9)
+
+        self.stackedWidget.addWidget(self.attendanceCapturePage)
         self.manageStudentsPage = QWidget()
         self.manageStudentsPage.setObjectName(u"manageStudentsPage")
         self.verticalLayout_9 = QVBoxLayout(self.manageStudentsPage)
@@ -594,13 +623,13 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.stackedWidget)
 
 
-        self.horizontalLayout.addWidget(self.widget)
+        self.verticalLayout_5.addWidget(self.widget)
 
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(2)
+        self.stackedWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -616,6 +645,8 @@ class Ui_MainWindow(object):
         self.dateSelectorButton.setText(QCoreApplication.translate("MainWindow", u"Date Selector", None))
         self.takeAttendanceButton.setText(QCoreApplication.translate("MainWindow", u"Take Attendance", None))
         self.sortByButton.setText(QCoreApplication.translate("MainWindow", u"Sort by:", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Camera window in here", None))
+        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Anything else in here", None))
         self.label_15.setText(QCoreApplication.translate("MainWindow", u"Your Students", None))
         self.addStudentButton_3.setText("")
         self.lineEdit_3.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Find Student ...", None))
