@@ -3,77 +3,31 @@ import firebase_admin
 from firebase_admin import credentials, db, storage
 import numpy as np
 
-
-
 class FaceRecognitionFirebaseDB():
-    def __init__(self, name = "TestDB"):
+    def __init__(self, name="TestDB"):
         self._cred = credentials.Certificate("serviceAccountKey.json")
-        firebase_admin.initialize_app(self._cred, {
-            'databaseURL': "https://spring-capstone-c5472-default-rtdb.firebaseio.com/",
-            'storageBucket': 'spring-capstone-c5472.appspot.com'
-        
-        })
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app(self._cred, {
+                'databaseURL': "https://spring-capstone-c5472-default-rtdb.firebaseio.com/",
+                'storageBucket': 'spring-capstone-c5472.appspot.com'
+            })
         self._name = name
         self._student_ref = db.reference('Students')
         self._bucket = storage.bucket()
         self._blob = None
-        ''' Student Data format
-        {
-            StudentID: {
-                "full_name": 
-                "major:
-                "minor":
-                "total_attendance": 
-            }
-
-        }
-        '''
+        
         self._instructor_ref = db.reference('Instructors')
-        ''' Instructor Data format
-        {
-            InstructorID: {
-                "first_name": 
-                "last_name": 
-                "department": 
-                "email": 
-                "password": 
-            }
-
-        }
-        '''
         self._course_ref = db.reference('Courses')
-        ''' Course Data format
-        {
-            CourseName-sectionID: {
-                "course_name": 
-                "section_id:
-                "meeting_days": ["day1", "day2"]
-                "capacity": 
-                "enrolled":
-                "students_enrolled": [1, 2 ... n]
-            }
-
-        }
-        '''
         self._attendance_ref = db.reference('Attendance')
-        ''' Course Data format - list of students correspond to students that were
-                                 present for that class, section and for that date
-        {
-            "CourseName-sectionID/Date": [studentID1, studentID2, studentID3 ... studentIDn]
-            }
 
-        }
-        '''
     def __str__(self):
         return self._name
 
     def addAttendance(self, attendanceDict):
-
         for key, value in attendanceDict.items():
             self._attendance_ref.child(key).set(value)
 
     def addCourse(self, courseDict):
-        # print(courseDict)
         for key, value in courseDict.items():
             self._course_ref.child(key).set(value)
 
@@ -86,26 +40,22 @@ class FaceRecognitionFirebaseDB():
             self._instructor_ref.child(key).set(value)
 
     def getStudent(self, studentID: str):
-        ''' Make API call to get ONE student from firebase'''
         return db.reference(f"Students/{studentID}").get()
 
     def getInstructor(self, instructorID: str):
-        ''' Make API call to get ONE instructor from firebase'''
         return db.reference(f"Instructors/{instructorID}").get()
-    
+
     def getCourse(self, course_name: str, section_id: str):
-        ''' Make API call to get ONE student from firebase'''
         return db.reference(f"Courses/{course_name}-{section_id}").get()
-    
-    def getAttendance(self, course_name: str, section_id: str, date:str):
-        ''' Make API call to get ONE student from firebase'''
+
+    def getAttendance(self, course_name: str, section_id: str, date: str):
         return db.reference(f"Attendance/{course_name}-{section_id}/{date}").get()
 
     def deleteStudent(self, student_id):
         try:
             logging.debug(f"Deleting student with ID: {student_id}")
             student_ref = self._student_ref.child(student_id)
-            student_ref.delete()  # Correct method to delete a node in Firebase Realtime Database
+            student_ref.delete()
             logging.info(f"Student with ID {student_id} deleted successfully.")
         except Exception as e:
             logging.error(f"Error during delete: {str(e)}")
@@ -115,28 +65,26 @@ class FaceRecognitionFirebaseDB():
         try:
             logging.debug(f"Deleting Course with ID: {course_name}-{section_id}")
             course_ref = self._course_ref.child(f"{course_name}-{section_id}")
-            course_ref.delete()  # Correct method to delete a node in Firebase Realtime Database
+            course_ref.delete()
             logging.info(f"Course with ID {course_name}-{section_id} deleted successfully.")
         except Exception as e:
             logging.error(f"Error during delete: {str(e)}")
             raise
 
     def getAllStudents(self):
-        ret = self._student_ref.get()
-        return ret
-    
+        return self._student_ref.get()
+
     def getAllCourses(self):
         return self._course_ref.get()
 
-    def updateCourseData(self, course_name: str, section_id:str, oldCourseID: str, old_section_id:str, newCourseData: dict):
+    def updateCourseData(self, course_name: str, section_id: str, oldCourseID: str, old_section_id: str, newCourseData: dict):
         try:
-            if course_name != oldCourseID or section_id != old_section_id: # changing course and or section id(s) as well
+            if course_name != oldCourseID or section_id != old_section_id:
                 values = self.getCourse(oldCourseID, old_section_id)
                 self.deleteCourse(values["course_name"], values["section_id"])
                 for key in newCourseData.keys():
                     values[key] = newCourseData[key]
                 self.addCourse({f"{course_name}-{section_id}": values})
-            
             else:
                 ref = db.reference(f"Courses/{course_name}-{section_id}")
                 for key in newCourseData.keys():
@@ -146,20 +94,17 @@ class FaceRecognitionFirebaseDB():
                         logging.error(f"Error updating student data: {str(e)}")
                         pass
         except Exception as e:
-            print("An error occured during deletion: ", e)
-            return
-    
+            print("An error occurred during deletion: ", e)
 
     def updateStudent(self, studentID: str, oldID: int, newStudentData: dict):
         student_info = self.getStudent(studentID)
-        if studentID != oldID: # "student_id" in newStudentData.keys(): # changing student id as well
+        if studentID != oldID:
             values = self.getStudent(oldID)
             self.deleteStudent(values["student_id"])
             values["student_id"] = newStudentData["student_id"]
             for key in newStudentData.keys():
                 values[key] = newStudentData[key]
             self.addStudent({values["student_id"]: values})
-        
         else:
             ref = db.reference(f"Students/{studentID}")
             for key in newStudentData.keys():
@@ -188,9 +133,6 @@ class FaceRecognitionFirebaseDB():
         except Exception as e:
             logging.error(f"Download unsuccessful: {str(e)}")
 
-
-
-
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     print("Testing database")
@@ -205,49 +147,15 @@ if __name__ == '__main__':
             "capacity": 30
         }
     }
-    testDB.addCourse(courseDict=course_data)
+    testDB.addCourse(course_data)
     testPull = testDB.getCourse("CMPT101", "AS01")
     
     print(testPull)
 
     attendance_data = {
-        "CMPT101-AS01/2024-05-30": [1,2,3,4,5,6,7,8,9]
+        "CMPT101-AS01/2024-05-30": [1, 2, 3, 4, 5, 6, 7, 8, 9]
     }
     testDB.addAttendance(attendance_data)
     testPull = testDB.getAttendance("CMPT101", "AS01", "2024-05-30")
     
     print(testPull)
-    # student_data = {
-    #     "3101002": {
-    #         "name": "Olasubomi Badiru",
-    #         "major": "Computer Science",
-    #         "minor": "Mathematics",
-    #         "total_attendance": 0
-    #     }
-    # }
-
-    # instructor_data = {
-    #     "9101001": {
-    #         "first_name": "Mohammed",
-    #         "last_name": "El-hajj",
-    #         "department": "Computer Science",
-    #         "email": "elhajjm@macewan.ca",
-    #         "password": "barcelona"
-    #     }
-    # }
-    # testDB.addStudent(student_data)
-    # testDB.addStudent({
-    #     "3101003": {
-    #         "name": "Will Smith"
-    #     }
-    # })
-    # testDB.addStudent({
-    #     "3101004": {
-    #         "name": "Cardi Bee"
-    #     }
-    # })
-    # testDB.updateStudentData("3101003", {"major": "Music", "minor": "Rap studies"})
-    # cardiTest = testDB.getStudent("3101003")
-    # print(cardiTest)
-
-    # testDB.addInstructor(instructor_data)

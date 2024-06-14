@@ -202,8 +202,8 @@ QPushButton:hover{
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>1180</width>
-                <height>691</height>
+                <width>200</width>
+                <height>244</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -392,54 +392,75 @@ QPushButton:hover{
           <layout class="QHBoxLayout" name="horizontalLayout_9">
            <item>
             <widget class="QWidget" name="widget_9" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>640</width>
+               <height>900</height>
+              </size>
+             </property>
              <layout class="QVBoxLayout" name="verticalLayout_12">
+              <property name="rightMargin">
+               <number>9</number>
+              </property>
               <item>
-               <widget class="QWidget" name="widget_10" native="true">
+               <widget class="QWidget" name="camera_interface" native="true">
+                <property name="maximumSize">
+                 <size>
+                  <width>640</width>
+                  <height>480</height>
+                 </size>
+                </property>
                 <property name="styleSheet">
                  <string notr="true">background-color: rgb(210, 219, 255);</string>
                 </property>
-                <widget class="QLabel" name="label_2">
-                 <property name="geometry">
-                  <rect>
-                   <x>530</x>
-                   <y>250</y>
-                   <width>111</width>
-                   <height>16</height>
-                  </rect>
-                 </property>
-                 <property name="text">
-                  <string>Camera window in here</string>
-                 </property>
-                </widget>
                </widget>
               </item>
               <item>
-               <widget class="QWidget" name="widget_11" native="true">
+               <widget class="QWidget" name="attendance_status" native="true">
                 <property name="maximumSize">
                  <size>
-                  <width>16777215</width>
+                  <width>640</width>
                   <height>100</height>
                  </size>
                 </property>
                 <property name="styleSheet">
                  <string notr="true">background-color: rgb(216, 255, 252);</string>
                 </property>
-                <widget class="QLabel" name="label_6">
-                 <property name="geometry">
-                  <rect>
-                   <x>530</x>
-                   <y>40</y>
-                   <width>111</width>
-                   <height>16</height>
-                  </rect>
-                 </property>
-                 <property name="text">
-                  <string>Anything else in here</string>
-                 </property>
-                </widget>
                </widget>
               </item>
              </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="camera_on_button">
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Turn On</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="camera_off_button">
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Turn Off</string>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>5</width>
+               <height>5</height>
+              </size>
+             </property>
             </widget>
            </item>
           </layout>
@@ -566,8 +587,8 @@ QPushButton:hover{
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>1144</width>
-                      <height>488</height>
+                      <width>98</width>
+                      <height>28</height>
                      </rect>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_3">
@@ -781,8 +802,8 @@ QPushButton:hover{
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>1144</width>
-                      <height>488</height>
+                      <width>98</width>
+                      <height>28</height>
                      </rect>
                     </property>
                     <layout class="QHBoxLayout" name="horizontalLayout_11">
