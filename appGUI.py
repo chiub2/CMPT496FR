@@ -2,10 +2,11 @@ import logging
 import sys
 from tkinter import messagebox
 from PyQt5.uic import loadUi
-#from PySide6.QtCore import QPoint
+# from PySide6.QtCore import QPoint
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFrame, QAction, QMenu, QDesktopWidget, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QMenu, QMessageBox, QGraphicsDropShadowEffect
 from PyQt5.QtGui import *
+from PyQt5.QtCore import QPoint
 import numpy as np
 from AddStudentDialog import AddStudentDialog
 from AddCourseDialog import AddCourseDialog
@@ -24,6 +25,12 @@ class MainWindow(QMainWindow):
         self.db = FaceRecognitionFirebaseDB()   #-----> db here
         self.ui.setupUi(self)
 
+        effect = QGraphicsDropShadowEffect(
+        offset=QPoint(3, 3), blurRadius=25, color=QColor("#111")
+        )
+        self.ui.headerWidget.setGraphicsEffect(effect)
+        
+
 
         #Change default Font
         QFontDatabase.addApplicationFont("UI/Font/Kamerik105Cyrillic-Bold.ttf")
@@ -31,7 +38,8 @@ class MainWindow(QMainWindow):
         # custom_font.setWeight(18)
         QApplication.setFont(custom_font, "QLabel")
         # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        # self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+
 
         # Create initial student widgets
         self.refresh_student_data()

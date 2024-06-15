@@ -42,6 +42,7 @@ class AddStudentDialog(QtWidgets.QDialog):
 
         self.layout.addWidget(self.buttons)
         self.setLayout(self.layout)
+        self.setModal(True)
 
     def get_student_data(self):
         return {

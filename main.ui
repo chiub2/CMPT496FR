@@ -50,8 +50,12 @@
          <property name="styleSheet">
           <string notr="true">QWidget{
 	background-color: rgb(123, 3, 35);
+	border: 0px solid rgb(0,0,0);
+	border-bottom-left-radius : 50px; 
+	border-bottom-right-radius : 50px;
 
 }
+
 QPushButton{
 	color:white;
 	height:30px;
@@ -185,7 +189,7 @@ QPushButton:hover{
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="attendancePage">
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -202,8 +206,8 @@ QPushButton:hover{
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>1180</width>
-                <height>691</height>
+                <width>1162</width>
+                <height>673</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -781,8 +785,8 @@ QPushButton:hover{
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>1144</width>
-                      <height>488</height>
+                      <width>1126</width>
+                      <height>470</height>
                      </rect>
                     </property>
                     <layout class="QHBoxLayout" name="horizontalLayout_11">

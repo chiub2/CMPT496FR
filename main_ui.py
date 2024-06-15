@@ -43,8 +43,12 @@ class Ui_MainWindow(object):
         self.headerWidget.setMinimumSize(QSize(0, 80))
         self.headerWidget.setStyleSheet(u"QWidget{\n"
 "	background-color: rgb(123, 3, 35);\n"
+"	border: 0px solid rgb(0,0,0);\n"
+"	border-bottom-left-radius : 50px; \n"
+"	border-bottom-right-radius : 50px;\n"
 "\n"
 "}\n"
+"\n"
 "QPushButton{\n"
 "	color:white;\n"
 "	height:30px;\n"
@@ -122,7 +126,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 1180, 691))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 1162, 673))
         self.verticalLayout_3 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.frame_2 = QFrame(self.scrollAreaWidgetContents)
@@ -493,7 +497,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 1144, 488))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 1126, 470))
         self.horizontalLayout_11 = QHBoxLayout(self.scrollAreaWidgetContents_2)
         self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
         self.coursesGridLayout = QGridLayout()
@@ -629,7 +633,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(3)
 
 
         QMetaObject.connectSlotsByName(MainWindow)

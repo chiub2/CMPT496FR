@@ -40,6 +40,7 @@ class AddCourseDialog(QtWidgets.QDialog):
 
         self.layout.addWidget(self.buttons)
         self.setLayout(self.layout)
+        self.setModal(True)
 
     def get_course_data(self):
         return {
