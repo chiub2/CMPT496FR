@@ -6,6 +6,7 @@ from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QMenu, QMessageBox, QGraphicsDropShadowEffect
 from PyQt5.QtGui import *
+from PyQt5.QtGui import QImage, QPixmap, QFont, QFontDatabase
 from PyQt5.QtCore import QPoint
 import numpy as np
 from AddStudentDialog import AddStudentDialog
@@ -13,8 +14,45 @@ from AddCourseDialog import AddCourseDialog
 from mainWindowInterface import *
 import testCaptureUI
 from AddDataToDatabase import FaceRecognitionFirebaseDB
+import cv2
+import threading
+from PyQt5.QtGui import QImage, QPixmap
+from mainWindowInterface import Ui_MainWindow
+from datetime import datetime
+import pickle
+from tkinter import messagebox
+from firebase_admin import storage
+import testCaptureUI
 
 
+# class VideoThread(threading.Thread):
+#     def __init__(self, label):
+#         super(VideoThread, self).__init__()
+#         self.label = label
+#         if not isinstance(self.label, QtWidgets.QLabel):
+#             raise TypeError("label must be a QLabel")
+#         self.cap = cv2.VideoCapture(0)
+#         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+#         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+#         self.running = True
+
+#     def run(self):
+#         while self.running:
+#             ret, frame = self.cap.read()
+#             if ret:
+#                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+#                 h, w, ch = frame.shape
+#                 bytes_per_line = ch * w
+#                 qt_image = QImage(frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
+#                 pixmap = QPixmap.fromImage(qt_image)
+#                 self.label.setPixmap(pixmap)
+#                 self.label.update()
+#             else:
+#                 print("Failed to read frame from camera.")
+#         self.cap.release()
+
+#     def stop(self):
+#         self.running = False
 
 
 class MainWindow(QMainWindow):
@@ -24,9 +62,9 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.db = FaceRecognitionFirebaseDB()   #-----> db here
         self.ui.setupUi(self)
-
+        self.video_thread = None
         effect = QGraphicsDropShadowEffect(
-        offset=QPoint(3, 3), blurRadius=25, color=QColor("#111")
+        offset = QPoint(3, 3), blurRadius=25, color=QColor("#111")
         )
         self.ui.headerWidget.setGraphicsEffect(effect)
         
@@ -38,8 +76,10 @@ class MainWindow(QMainWindow):
         # custom_font.setWeight(18)
         QApplication.setFont(custom_font, "QLabel")
         # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        # self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
+
+        # Load face encodings
 
         # Create initial student widgets
         self.refresh_student_data()
@@ -78,6 +118,16 @@ class MainWindow(QMainWindow):
         self.refresh_student_data()
         self.refresh_course_data()
 
+
+
+        # Camera control buttons
+        self.ui.camera_on_button.clicked.connect(self.start_camera)
+        self.ui.camera_off_button.clicked.connect(self.stop_camera)
+
+        self.refresh_student_data()
+        self.refresh_course_data()
+
+
         self.show()
 
         
@@ -99,6 +149,29 @@ class MainWindow(QMainWindow):
 
         #set default screen
         self.switchToManageCoursesPage()
+
+
+#===================================================Camera Control
+    def start_camera(self):
+        logging.debug("Starting camera")
+        self.video_thread = threading.Thread(target=testCaptureUI.launch, args=(self.ui.camera_interface,))
+        self.video_thread.start()
+
+    def stop_camera(self):
+        logging.debug("Stopping camera")
+        testCaptureUI.stop()
+        self.video_thread.join()
+        testCaptureUI.clear_label(self.ui.camera_interface)
+
+    def clear_camera_interface(self):
+        self.ui.camera_interface.clear()  # Clear the label
+
+        # Optionally, set a black pixmap to cover the area
+        black_image = QImage(640, 480, QImage.Format_RGB888)
+        black_image.fill(QtCore.Qt.black)
+        pixmap = QPixmap.fromImage(black_image)
+        self.ui.camera_interface.setPixmap(pixmap)
+        logging.debug("Camera interface cleared")
 
 
 #===================================================Adding Courses to Database
@@ -403,6 +476,7 @@ class MainWindow(QMainWindow):
         self.ui.stackedWidget.setCurrentIndex(4)
 
     def launchCapture(self):
+        
         testCaptureUI.launch()
 
 
