@@ -1,45 +1,36 @@
 import cv2
-import dlib
 import face_recognition
 import pickle
 import os
 import firebase_admin
-from firebase_admin import  storage, credentials
-
-
-
+from firebase_admin import credentials, storage
 
 class EncoderDB():
-    ''' The only mehod you need from this class is uploadFile() '''
-    def __init__(self, name = "Test Encoder DB"):
+    ''' The only method you need from this class is uploadFile() '''
+    def __init__(self, name="Test Encoder DB"):
         self._cred = credentials.Certificate("serviceAccountKey.json")
-        firebase_admin.initialize_app(self._cred, {
-            'databaseURL': "https://spring-capstone-c5472-default-rtdb.firebaseio.com/",
-            'storageBucket': 'spring-capstone-c5472.appspot.com'
-        })
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app(self._cred, {
+                'databaseURL': "https://spring-capstone-c5472-default-rtdb.firebaseio.com/",
+                'storageBucket': 'spring-capstone-c5472.appspot.com'
+            })
         self._name = name
         self._bucket = storage.bucket()
         self._blob = None
-    
+
     def __str__(self):
         return self._name
-    
-    def uploadFile(self, fName):
-        ''' 
-        no need to specify path before calling, this 
-        function finds the path using global variable - folderPath
-        '''
-        fileName = self.getFname(fName)
-        self._blob = self._bucket.blob(fileName)
-        try:    
-            self._blob.upload_from_filename(fileName)
-            print("Upload succesful")
-        except Exception as e:
-            print("Upload unsuccesful: ",e)
 
-    def getFname(self, path):
-        return f"{folderPath}/{path}" #os.path.join(folderPath, path)
-    
+    def uploadFile(self, local_path, remote_path):
+        ''' 
+        Upload file to Firebase Storage 
+        '''
+        self._blob = self._bucket.blob(remote_path)
+        try:
+            self._blob.upload_from_filename(local_path)
+            print(f"Upload successful: {local_path} to {remote_path}")
+        except Exception as e:
+            print(f"Upload unsuccessful: {local_path} to {remote_path}", e)
 
 # Importing student images
 folderPath = "Images"
@@ -48,11 +39,23 @@ pathList = os.listdir(folderPath)
 imageList = []
 studentIds = []
 
-for path in pathList:
-    imageList.append(cv2.imread(os.path.join(folderPath, path)))
-    path = path.split(".")[0]
-    studentIds.append(path)
+# Initialize EncoderDB
+testEncodeDB = EncoderDB()
 
+for path in pathList:
+    if path.endswith('.png'):  # Ensure we only process .png files
+        img = cv2.imread(os.path.join(folderPath, path))
+        if img is not None:
+            imageList.append(img)
+            studentId = path.split(".")[0]
+            studentIds.append(studentId)
+
+            # Upload the image to Firebase
+            local_path = os.path.join(folderPath, path)
+            remote_path = f"Images/{path}"
+            testEncodeDB.uploadFile(local_path, remote_path)
+        else:
+            print(f"Error loading image: {path}")
 
 def findEncodings(imageList):
     encodeList = []
@@ -67,16 +70,15 @@ encodeListKnown = findEncodings(imageList)
 encodeListKnownIds = [encodeListKnown, studentIds]
 print("Encoding Complete")
 
-file = open("EncodeFile.p", 'wb')
-pickle.dump(encodeListKnownIds, file)
-file.close
+file_path = "EncodeFile.p"
+with open(file_path, 'wb') as file:
+    pickle.dump(encodeListKnownIds, file)
 print("File Saved")
 
-    
-
+# Upload EncodeFile.p to Firebase Storage in the Resources directory
+testEncodeDB.uploadFile(file_path, "Resources/EncodeFile.p")
 
 if __name__ == '__main__':
-
     # Usage
     testEncodeDB = EncoderDB()
-    status = testEncodeDB.uploadFile("3080126.png")
+    status = testEncodeDB.uploadFile(file_path, "Resources/EncodeFile.p")
