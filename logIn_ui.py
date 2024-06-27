@@ -15,59 +15,86 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QDialog, QFrame, QHBoxLayout,
-    QLabel, QSizePolicy, QWidget)
-import sys
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QPushButton,
+    QSizePolicy, QVBoxLayout, QWidget)
 
-class Ui_Dialog(object):
-    def setupUi(self, Dialog):
-        if not Dialog.objectName():
-            Dialog.setObjectName(u"Dialog")
-        Dialog.resize(400, 300)
-        self.frame = QFrame(Dialog)
-        self.frame.setObjectName(u"frame")
-        self.frame.setGeometry(QRect(-1, 9, 401, 291))
-        self.frame.setFrameShape(QFrame.StyledPanel)
-        self.frame.setFrameShadow(QFrame.Raised)
-        self.student1 = QFrame(self.frame)
-        self.student1.setObjectName(u"student1")
-        self.student1.setGeometry(QRect(80, 20, 300, 195))
-        self.student1.setMinimumSize(QSize(150, 100))
-        self.student1.setMaximumSize(QSize(300, 200))
-        self.student1.setStyleSheet(u"background-color: rgb(255, 255, 255);\n"
-"border-color: rgb(68, 8, 98);")
-        self.student1.setFrameShape(QFrame.StyledPanel)
-        self.student1.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_2 = QHBoxLayout(self.student1)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.frame_3 = QFrame(self.student1)
-        self.frame_3.setObjectName(u"frame_3")
-        self.frame_3.setFrameShape(QFrame.StyledPanel)
-        self.frame_3.setFrameShadow(QFrame.Raised)
-
-        self.horizontalLayout_2.addWidget(self.frame_3)
-
-        self.frame_4 = QFrame(self.student1)
-        self.frame_4.setObjectName(u"frame_4")
-        self.frame_4.setFrameShape(QFrame.StyledPanel)
-        self.frame_4.setFrameShadow(QFrame.Raised)
-        self.label = QLabel(self.frame_4)
-        self.label.setObjectName(u"label")
-        self.label.setGeometry(QRect(10, 10, 47, 13))
-        self.label_2 = QLabel(self.frame_4)
+class Ui_(object):
+    def setupUi(self, __qt_fake_top_level):
+        if not __qt_fake_top_level.objectName():
+            __qt_fake_top_level.setObjectName(u"__qt_fake_top_level")
+        self.widget_10 = QWidget(__qt_fake_top_level)
+        self.widget_10.setObjectName(u"widget_10")
+        self.widget_10.setGeometry(QRect(429, 186, 250, 100))
+        self.widget_10.setMinimumSize(QSize(250, 100))
+        self.widget_10.setMaximumSize(QSize(250, 100))
+        self.widget_10.setStyleSheet(u"background-color: rgb(247, 251, 255);")
+        self.horizontalLayout = QHBoxLayout(self.widget_10)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.widget_11 = QWidget(self.widget_10)
+        self.widget_11.setObjectName(u"widget_11")
+        self.verticalLayout_13 = QVBoxLayout(self.widget_11)
+        self.verticalLayout_13.setObjectName(u"verticalLayout_13")
+        self.widget_20 = QWidget(self.widget_11)
+        self.widget_20.setObjectName(u"widget_20")
+        self.horizontalLayout_12 = QHBoxLayout(self.widget_20)
+        self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
+        self.label_2 = QLabel(self.widget_20)
         self.label_2.setObjectName(u"label_2")
-        self.label_2.setGeometry(QRect(10, 40, 61, 16))
 
-        self.horizontalLayout_2.addWidget(self.frame_4)
+        self.horizontalLayout_12.addWidget(self.label_2)
 
 
-        self.retranslateUi(Dialog)
+        self.verticalLayout_13.addWidget(self.widget_20)
 
-        QMetaObject.connectSlotsByName(Dialog)
+        self.widget_19 = QWidget(self.widget_11)
+        self.widget_19.setObjectName(u"widget_19")
+        self.horizontalLayout_13 = QHBoxLayout(self.widget_19)
+        self.horizontalLayout_13.setObjectName(u"horizontalLayout_13")
+        self.label_6 = QLabel(self.widget_19)
+        self.label_6.setObjectName(u"label_6")
+
+        self.horizontalLayout_13.addWidget(self.label_6)
+
+
+        self.verticalLayout_13.addWidget(self.widget_19)
+
+
+        self.horizontalLayout.addWidget(self.widget_11)
+
+        self.widget_12 = QWidget(self.widget_10)
+        self.widget_12.setObjectName(u"widget_12")
+        self.widget_12.setMaximumSize(QSize(30, 150))
+        self.horizontalLayout_14 = QHBoxLayout(self.widget_12)
+        self.horizontalLayout_14.setSpacing(0)
+        self.horizontalLayout_14.setObjectName(u"horizontalLayout_14")
+        self.horizontalLayout_14.setContentsMargins(0, 0, 0, 0)
+        self.pushButton = QPushButton(self.widget_12)
+        self.pushButton.setObjectName(u"pushButton")
+        self.pushButton.setMinimumSize(QSize(25, 50))
+        self.pushButton.setMaximumSize(QSize(25, 150))
+        self.pushButton.setStyleSheet(u"QPushButton{\n"
+"	border:none;\n"
+"    }\n"
+"                              \n"
+"QPushButton:hover{\n"
+"	background-color: #b3b3b3;\n"
+"}")
+
+        self.horizontalLayout_14.addWidget(self.pushButton)
+
+
+        self.horizontalLayout.addWidget(self.widget_12)
+
+
+        self.retranslateUi(__qt_fake_top_level)
+
+        QMetaObject.connectSlotsByName(__qt_fake_top_level)
     # setupUi
 
-    def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Dialog", None))
-        self.label.setText(QCoreApplication.translate("Dialog", u"Name", None))
-        self.label_2.setText(QCoreApplication.translate("Dialog", u"Student ID", None))
+    def retranslateUi(self, __qt_fake_top_level):
+        self.label_2.setText(QCoreApplication.translate("", u"Class Name:", None))
+        self.label_6.setText(QCoreApplication.translate("", u"Section ID:", None))
+        self.pushButton.setText(QCoreApplication.translate("", u"menu", None))
+        pass
     # retranslateUi
+

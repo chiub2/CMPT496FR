@@ -23,6 +23,8 @@ import pickle
 from tkinter import messagebox
 from firebase_admin import storage
 import testCaptureUI
+from studentManagementWindow import *
+
 
 
 # class VideoThread(threading.Thread):
@@ -63,10 +65,10 @@ class MainWindow(QMainWindow):
         self.db = FaceRecognitionFirebaseDB()   #-----> db here
         self.ui.setupUi(self)
         self.video_thread = None
-        effect = QGraphicsDropShadowEffect(
-        offset = QPoint(3, 3), blurRadius=25, color=QColor("#111")
-        )
-        self.ui.headerWidget.setGraphicsEffect(effect)
+        # effect = QGraphicsDropShadowEffect(
+        # offset = QPoint(3, 3), blurRadius=25, color=QColor("#111")
+        # )
+        # self.ui.headerWidget.setGraphicsEffect(effect)
         
 
 
@@ -84,15 +86,6 @@ class MainWindow(QMainWindow):
         # Create initial student widgets
         self.refresh_student_data()
 
-
-        # # self.createNewWidgets(0, 0)
-        # # FOR loop
-        # # 10 rows
-        # for x in range(0,10):
-        #     # columns
-        #     for y in range(0,3):
-        #         self.createStudentWidget(x, y)
-
         
         # Search for students
         self.ui.studentSearchButton.clicked.connect(self.search_student)
@@ -100,7 +93,7 @@ class MainWindow(QMainWindow):
         # Adding students to DataBase
         self.ui.addStudentButton_3.clicked.connect(self.show_add_student_dialog)
 
-        
+        self.ui.manageStudentsAttendanceButton.clicked.connect(self.manageStudentsinClass)
 
         # Connection student refresh button data
         self.ui.refreshbutton.clicked.connect(self.refresh_student_data)
@@ -150,7 +143,14 @@ class MainWindow(QMainWindow):
         #set default screen
         self.switchToManageCoursesPage()
 
-
+#==============================Manage students in class
+    def manageStudentsinClass(self):
+        # Requirements: pass course name and section ID. 
+        # StudentsManagemenetApp should obtain students' information by 
+        # and ensure students added actually exist
+        self.manageStudents = StudentManagementApp()
+        if self.manageStudents.exec_() == QDialog.Accepted:
+            print("dialog ended")
 #===================================================Camera Control
     def start_camera(self):
         logging.debug("Starting camera")
@@ -214,14 +214,14 @@ class MainWindow(QMainWindow):
                 if courses != None:
                     for course in courses:
                         if course != None:
-                            self.createCourseWidget(row, col, course)
+                            self.createCourseWidget2(row, col, course)
                             col += 1
                             if col == 3:
                                 col = 0
                                 row += 1
             elif isinstance(courses, dict):
                 for course_name, course_info in courses.items():
-                    self.createCourseWidget(row, col, course_info)
+                    self.createCourseWidget2(row, col, course_info)
                     col += 1
                     if col == 3:
                         col = 0
@@ -285,7 +285,7 @@ class MainWindow(QMainWindow):
         row = 0
         col = 0
         for course_info in courses.values():
-            self.createCourseWidget(row, col, course_info)
+            self.createCourseWidget2(row, col, course_info)
             col += 1
             if col == 3:
                 col = 0
@@ -335,6 +335,47 @@ class MainWindow(QMainWindow):
         self.db.addStudent(student_dict)
         QMessageBox.information(self, "Success", "Student added successfully!")
         self.refresh_student_data()
+
+    def fillStudentAttendanceGrid(self, course_info):
+        try:
+            for i in reversed(range(self.ui.studentsAttendanceGrid.count())):
+                widget = self.ui.gridLayout_3.itemAt(i).widget()
+                if widget is not None:
+                    widget.setParent(None)
+
+            students = self.db.getAllStudentsinClass()
+            row = 0
+            col = 0
+            print(students)
+            '''
+            Some extremely weird behaviour going on here, if database is empty and user adds a student,
+            students will be of instance list, but if database is not empty and user adds or edits a student,
+            database will be of type dictionary
+
+
+            ---> temp fix, check for instance of students and execute approprriate algorithm
+            '''
+            if isinstance(students, list):
+                if students != None:
+                    for student in students:
+                        if student != None:
+                            self.createStudentWidget(row, col, student)
+                            col += 1
+                            if col == 3:
+                                col = 0
+                                row += 1
+            elif isinstance(students, dict):
+                for student_id, student_info in students.items():
+                    self.createStudentWidget(row, col, student_info)
+                    col += 1
+                    if col == 3:
+                        col = 0
+                        row += 1
+        except Exception as e:
+            print(f"Error during refresh: {e}")
+
+        return
+    
 
     def refresh_student_data(self):
         try:
@@ -406,7 +447,7 @@ class MainWindow(QMainWindow):
     #Methods to show context menus
     def user_context_menu(self):
 
-        self.show_custom_context_menu(self.ui.userDropMenuButton, ["Profile", "My Classes", "My Students", "Reports", "Sign Out", "Temp-Take Attendance"])
+        self.show_custom_context_menu(self.ui.userDropMenuButton, ["Profile", "My Classes", "My Students", "Reports", "Sign Out"])
 
 
     def show_custom_context_menu(self, button, menu_items):
@@ -440,45 +481,192 @@ class MainWindow(QMainWindow):
     def handle_menu_item_click(self):
         text = self.sender().text()
         match text:
-            case "My Classes":
-                self.switchToManageCoursesPage()
             case "Profile":
                 self.switchToProfilePage()
+            case "My Classes":
+                self.switchToManageCoursesPage()
+            case "My Students":
+                self.switchToManageStudentsPage()
             case "Reports":
                 self.switchToReportsPage()
             case "Sign Out":
                 sys.exit(0)
-            case "My Students":
-                self.switchToManageStudentsPage()
-            case "Temp-Take Attendance":
-                self.switchToAttendancePage()
+            # case "Temp-Take Attendance":
+            #     self.switchToAttendancePage()
             case _:
                 pass
+    
 
-
-    def switchToAttendancePage(self):
+    def switchToAttendancePage(self, course_info):
         self.ui.stackedWidget.setCurrentIndex(0)
+        # self.ui.attendancePage_classNameLabel.setText(f"Attendance: {course_info["course_name"].title()}")
         
     def switchToManageStudentsPage(self):
-        self.ui.stackedWidget.setCurrentIndex(1)
+        self.ui.stackedWidget.setCurrentIndex(2)
         # Must populate student tiles here
         # set flag so you don't need to repopulate everytime
 
     def switchToManageCoursesPage(self):
-        self.ui.stackedWidget.setCurrentIndex(2)
+        self.ui.stackedWidget.setCurrentIndex(3)
         # Must populate course tiles here
         # set flag so you don't need to repopulate everytime
 
     def switchToReportsPage(self):
-        self.ui.stackedWidget.setCurrentIndex(3)
+        self.ui.stackedWidget.setCurrentIndex(4)
 
     def switchToProfilePage(self):
-        self.ui.stackedWidget.setCurrentIndex(4)
+        self.ui.stackedWidget.setCurrentIndex(5)
 
     def launchCapture(self):
         
         testCaptureUI.launch()
 
+    # Context Menu operations for course card widgets:
+    def course_context_menu(self, triggerButton, course_info):
+
+        self.show_course_custom_context_menu(triggerButton, ["Edit", "Delete", "Take Attendance"], course_info)
+
+
+    def show_course_custom_context_menu(self, button, menu_items, course_info):
+        menu = QMenu(self)
+
+        #Set style sheet
+        menu.setStyleSheet("""
+                           
+                           QMenu{
+                           background-color: black;
+                           color: white;
+                           }
+                           
+
+                           QMenu:selected{
+                           background-color:white;
+                           color: #12B298;
+                           }
+                           """)
+
+        #Add actions to the menu
+        for item_text in menu_items:
+            action = QAction(item_text, self)
+            action.triggered.connect(lambda: self.handle_course_menu_item_click(course_info) )
+            menu.addAction(action)
+
+        # Show the menu
+        menu.move(button.mapToGlobal(button.rect().topLeft()))
+        menu.exec()
+    
+    def handle_course_menu_item_click(self, course_info):
+        text = self.sender().text()
+        match text:
+            case "Edit":
+                self.edit_course(course_info["course_name"], course_info["section_id"])
+            case "Delete":
+                self.delete_course(course_info["course_name"], course_info["section_id"])
+            case "Take Attendance":
+                self.switchToAttendancePage(course_info)
+            case _:
+                pass
+
+    def createCourseWidget2(self, rowNumber, columnNumber, course_info = None):
+
+        # CREATE NEW UNIQUE NAMES FOR THE WIDGETS ---> dev check. REMOVE BEFORE DEPLOY
+        newName = "frame" + course_info["course_name"]
+
+        print(newName)
+
+        self.courseCard = QtWidgets.QWidget(self.ui.scrollAreaWidgetContents_2)
+        self.courseCard.setMinimumSize(QtCore.QSize(250, 120))
+        self.courseCard.setMaximumSize(QtCore.QSize(250, 120))
+        self.courseCard.setStyleSheet("background-color: rgb(247, 251, 255);\n"
+                                        "\n"
+                                        "QPushButton{\n"
+                                        "    padding-left:10px;\n"
+                                        "    padding-right:10px;\n"
+                                        "    border: 1px solid gray;\n"
+                                        "    border-radius: 10px;\n"
+                                        "}\n"
+                                        "\n"
+                                        "QPushButton:hover{\n"
+                                        "   background-color: #b3b3b3;\n"
+                                        "}")
+        self.courseCard.setObjectName("courseCard")
+        self.horizontalLayout1 = QtWidgets.QHBoxLayout(self.courseCard)
+        self.horizontalLayout1.setObjectName("horizontalLayout1")
+        self.widget_111 = QtWidgets.QWidget(self.courseCard)
+        self.widget_111.setObjectName("widget_111")
+        self.verticalLayout_131 = QtWidgets.QVBoxLayout(self.widget_111)
+        self.verticalLayout_131.setObjectName("verticalLayout_131")
+        self.classNameWidget = QtWidgets.QWidget(self.widget_111)
+        self.classNameWidget.setObjectName("classNameWidget")
+        self.horizontalLayout_121 = QtWidgets.QHBoxLayout(self.classNameWidget)
+        self.horizontalLayout_121.setObjectName("horizontalLayout_121")
+        self.classNameLabel = QtWidgets.QLabel(self.classNameWidget)
+        self.classNameLabel.setObjectName("classNameLabel")
+        self.horizontalLayout_121.addWidget(self.classNameLabel)
+        self.verticalLayout_131.addWidget(self.classNameWidget)
+        self.sectionIDWidget = QtWidgets.QWidget(self.widget_111)
+        self.sectionIDWidget.setObjectName("sectionIDWidget")
+        self.horizontalLayout_131 = QtWidgets.QHBoxLayout(self.sectionIDWidget)
+        self.horizontalLayout_131.setObjectName("horizontalLayout_131")
+        self.sectionLabel = QtWidgets.QLabel(self.sectionIDWidget)
+        self.sectionLabel.setObjectName("sectionLabel")
+        self.horizontalLayout_131.addWidget(self.sectionLabel)
+        self.verticalLayout_131.addWidget(self.sectionIDWidget)
+        self.horizontalLayout1.addWidget(self.widget_111)
+        self.cardMenuButtonWidget = QtWidgets.QWidget(self.courseCard)
+        self.cardMenuButtonWidget.setMaximumSize(QtCore.QSize(30, 150))
+        self.cardMenuButtonWidget.setObjectName("cardMenuButtonWidget")
+        self.horizontalLayout_141 = QtWidgets.QHBoxLayout(self.cardMenuButtonWidget)
+        self.horizontalLayout_141.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_141.setSpacing(0)
+        self.horizontalLayout_141.setObjectName("horizontalLayout_141")
+        self.courseCardMenuButton = QtWidgets.QPushButton(self.cardMenuButtonWidget)
+        self.courseCardMenuButton.setMinimumSize(QtCore.QSize(25, 50))
+        self.courseCardMenuButton.setMaximumSize(QtCore.QSize(25, 150))
+        self.courseCardMenuButton.setStyleSheet("QPushButton{\n"
+                "                                  border:none;\n"
+                "                                    }\n"
+                "                                                              \n"
+                "                                QPushButton:hover{\n"
+                "                                  background-color: #b3b3b3;\n"
+                "                                }")
+        self.courseCardMenuButton.setObjectName("courseCardMenuButton")
+
+        # Add pixmap Icon to menu button
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap("UI/UI resources/BlackIcons/threeDotMenu.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.courseCardMenuButton.setIcon(icon2)
+        self.courseCardMenuButton.setIconSize(QtCore.QSize(20, 30))
+
+        self.horizontalLayout_141.addWidget(self.courseCardMenuButton)
+        self.horizontalLayout1.addWidget(self.cardMenuButtonWidget)
+
+        #retranslate functions
+        _translate = QtCore.QCoreApplication.translate
+        if course_info == None:
+            self.classNameLabel.setText(_translate("MainWindow", "Course Name"))
+            self.sectionLabel.setText(_translate("MainWindow", "Section Name"))
+        else:
+            self.classNameLabel.setText(_translate("MainWindow", course_info["course_name"]))
+            self.sectionLabel.setText(_translate("MainWindow", course_info["section_id"]))
+
+        # Create new attribute to Ui_Mainwindow
+        # Syntax : setattr(obj, var, val)
+        # Parameters :
+        # obj : Object whose which attribute is to be assigned.
+        # var : object attribute which has to be assigned.
+        # val : value with which variable is to be assigned.
+        setattr(self.ui, newName, self.courseCard)
+
+        #$To uniquely identify each card menu button
+        setattr(self.ui, "cardMenuButton" + newName, self.courseCardMenuButton)
+        menuButton = getattr(self.ui, "cardMenuButton" + newName)
+        self.courseCardMenuButton.clicked.connect(lambda: self.course_context_menu(menuButton, course_info))
+        
+        self.ui.coursesGridLayout.addWidget(self.courseCard, rowNumber, columnNumber, 1, 1)
+        self.courseCard.setGraphicsEffect(QGraphicsDropShadowEffect(
+        offset = QPoint(3, 3), blurRadius=10, color=QColor("#b3b3b3")
+        ))
 
     def createCourseWidget(self, rowNumber, columnNumber, course_info = None):
         
@@ -489,8 +677,8 @@ class MainWindow(QMainWindow):
 
         # Course Card starts here
         self.courseCardWidget = QtWidgets.QWidget(self.ui.scrollAreaWidgetContents_2)
-        self.courseCardWidget.setMaximumSize(QtCore.QSize(150, 150))
-        self.courseCardWidget.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.courseCardWidget.setMaximumSize(QtCore.QSize(300, 150))
+        self.courseCardWidget.setStyleSheet("background-color:rgb(247, 251, 255);")
         self.courseCardWidget.setObjectName("courseCardWidget")
         self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.courseCardWidget)
         self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
@@ -556,6 +744,7 @@ class MainWindow(QMainWindow):
         self.horizontalLayout_12.addWidget(self.pushButton_5)
         self.horizontalLayout_9.addWidget(self.widget_13)
         self.verticalLayout_5.addWidget(self.widget_12)
+        
 
 
         #retranslate functions
@@ -579,14 +768,17 @@ class MainWindow(QMainWindow):
         setattr(self.ui, newName, self.courseCardWidget)
         
         self.ui.coursesGridLayout.addWidget(self.courseCardWidget, rowNumber, columnNumber, 1, 1)
+        self.courseCardWidget.setGraphicsEffect(QGraphicsDropShadowEffect(
+        offset = QPoint(3, 3), blurRadius=10, color=QColor("#b3b3b3")
+        ))
         
 
     def createStudentWidget(self, rowNumber, columnNumber, student_info=None):
         newName = "studentFrame" + student_info["student_id"]
 
         self.studentCardWidget = QtWidgets.QWidget(self.ui.scrollAreaWidgetContents_5)
-        self.studentCardWidget.setMaximumSize(QtCore.QSize(150, 150))
-        self.studentCardWidget.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.studentCardWidget.setMaximumSize(QtCore.QSize(300, 150))
+        self.studentCardWidget.setStyleSheet("background-color:rgb(247, 251, 255);")
         self.studentCardWidget.setObjectName("student" + student_info["student_id"] + "CardWidget")
         self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.studentCardWidget)
         self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
@@ -637,6 +829,14 @@ class MainWindow(QMainWindow):
         self.pushButton_3.setIconSize(QtCore.QSize(20, 20))
         self.pushButton_3.setAutoExclusive(True)
         self.pushButton_3.setObjectName("edit" + student_info["student_id"] + "Button")
+        # styleSheet====================>
+        self.pushButton_3.setStyleSheet("QPushButton{\n"
+                                        "    border:none;\n"
+                                        "}\n"
+                                        "\n"
+                                        "QPushButton:hover{\n"
+                                        "    background-color: #b3b3b3;\n"
+                                        "}")
         self.pushButton_3.clicked.connect(lambda: self.edit_student(student_info["student_id"]))
         self.horizontalLayout_12.addWidget(self.pushButton_3)
         self.pushButton_5 = QtWidgets.QPushButton(self.widget_13)
@@ -648,6 +848,14 @@ class MainWindow(QMainWindow):
         self.pushButton_5.setIconSize(QtCore.QSize(20, 20))
         self.pushButton_5.setAutoExclusive(True)
         self.pushButton_5.setObjectName("delete" + student_info["student_id"] + "Button")
+        # styleSheet====================>
+        self.pushButton_5.setStyleSheet("QPushButton{\n"
+                                        "    border:none;\n"
+                                        "}\n"
+                                        "\n"
+                                        "QPushButton:hover{\n"
+                                        "    background-color: #b3b3b3;\n"
+                                        "}")
         self.pushButton_5.clicked.connect(lambda: self.delete_student(student_info["student_id"]))
         self.horizontalLayout_12.addWidget(self.pushButton_5)
         self.horizontalLayout_9.addWidget(self.widget_13)
@@ -660,6 +868,9 @@ class MainWindow(QMainWindow):
 
         setattr(self.ui, newName, self.studentCardWidget)
         self.ui.gridLayout_3.addWidget(self.studentCardWidget, rowNumber, columnNumber, 1, 1)
+        self.studentCardWidget.setGraphicsEffect(QGraphicsDropShadowEffect(
+        offset = QPoint(3, 3), blurRadius=10, color=QColor("#b3b3b3")
+        ))
         print(f"Added student widget at ({rowNumber}, {columnNumber})")
 
 if __name__ == "__main__":
