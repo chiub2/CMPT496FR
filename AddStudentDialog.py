@@ -7,7 +7,7 @@ from firebase_admin import credentials, db, storage
 
 
 class AddStudentDialog(QtWidgets.QDialog):
-    def __init__(self, param = None):
+    def __init__(self, param=None):
         super().__init__()
         self.setWindowTitle("Add Student")
 
@@ -42,6 +42,7 @@ class AddStudentDialog(QtWidgets.QDialog):
 
         self.layout.addWidget(self.buttons)
         self.setLayout(self.layout)
+        self.setModal(True)
 
     def get_student_data(self):
         return {
