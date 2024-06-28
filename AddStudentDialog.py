@@ -7,7 +7,7 @@ from firebase_admin import credentials, db, storage
 
 
 class AddStudentDialog(QtWidgets.QDialog):
-    def __init__(self, param = None):
+    def __init__(self, param=None):
         super().__init__()
         self.setWindowTitle("Add Student")
 

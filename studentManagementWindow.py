@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem, QFormLayout
 
-class AddStudentDialog(QDialog):
+class AddStudentDialog_Attendance(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Add Student")
@@ -47,7 +47,7 @@ class StudentManagementApp(QDialog):
         self.layout.addLayout(button_layout)
     
     def open_add_student_dialog(self):
-        dialog = AddStudentDialog()
+        dialog = AddStudentDialog_Attendance()
         if dialog.exec() == QDialog.Accepted:
             row_position = self.table.rowCount()
             self.table.insertRow(row_position)
