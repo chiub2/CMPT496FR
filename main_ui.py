@@ -31,8 +31,10 @@ class Ui_MainWindow(object):
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.centralwidget.setStyleSheet(u"background-color:rgb(247, 251, 255);")
-        self.verticalLayout_5 = QVBoxLayout(self.centralwidget)
-        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.horizontalLayout = QHBoxLayout(self.centralwidget)
+        self.horizontalLayout.setSpacing(0)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.widget = QWidget(self.centralwidget)
         self.widget.setObjectName(u"widget")
         self.verticalLayout = QVBoxLayout(self.widget)
@@ -67,7 +69,9 @@ class Ui_MainWindow(object):
 "	background-color: #34111a;\n"
 "}")
         self.horizontalLayout_2 = QHBoxLayout(self.headerWidget)
+        self.horizontalLayout_2.setSpacing(6)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(9, 9, 9, 9)
         self.horizontalSpacer = QSpacerItem(344, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_2.addItem(self.horizontalSpacer)
@@ -104,6 +108,11 @@ class Ui_MainWindow(object):
         self.userDropMenuButton.setObjectName(u"userDropMenuButton")
         self.userDropMenuButton.setMinimumSize(QSize(35, 35))
         self.userDropMenuButton.setMaximumSize(QSize(35, 35))
+        self.userDropMenuButton.setStyleSheet(u"QPushButton{\n"
+"	border: 0px solid grey;\n"
+"	border-radius: 15px;\n"
+"\n"
+"}")
         icon = QIcon()
         icon.addFile(u":/whiteIcons/whiteIcons/chevron-down.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.userDropMenuButton.setIcon(icon)
@@ -131,7 +140,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 1162, 673))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 1180, 691))
         self.verticalLayout_3 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.frame_2 = QFrame(self.scrollAreaWidgetContents)
@@ -417,82 +426,13 @@ class Ui_MainWindow(object):
         self.scrollArea_4.setWidgetResizable(True)
         self.scrollAreaWidgetContents_5 = QWidget()
         self.scrollAreaWidgetContents_5.setObjectName(u"scrollAreaWidgetContents_5")
-        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 1126, 491))
+        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 1144, 509))
         self.gridLayout_3 = QGridLayout(self.scrollAreaWidgetContents_5)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.studentsViewGridLayout = QGridLayout()
         self.studentsViewGridLayout.setSpacing(10)
         self.studentsViewGridLayout.setObjectName(u"studentsViewGridLayout")
         self.studentsViewGridLayout.setSizeConstraint(QLayout.SetFixedSize)
-        self.widget_10 = QWidget(self.scrollAreaWidgetContents_5)
-        self.widget_10.setObjectName(u"widget_10")
-        self.widget_10.setMinimumSize(QSize(250, 100))
-        self.widget_10.setMaximumSize(QSize(250, 100))
-        self.widget_10.setStyleSheet(u"background-color: rgb(247, 251, 255);")
-        self.horizontalLayout = QHBoxLayout(self.widget_10)
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.widget_11 = QWidget(self.widget_10)
-        self.widget_11.setObjectName(u"widget_11")
-        self.verticalLayout_13 = QVBoxLayout(self.widget_11)
-        self.verticalLayout_13.setObjectName(u"verticalLayout_13")
-        self.widget_20 = QWidget(self.widget_11)
-        self.widget_20.setObjectName(u"widget_20")
-        self.horizontalLayout_12 = QHBoxLayout(self.widget_20)
-        self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
-        self.label_2 = QLabel(self.widget_20)
-        self.label_2.setObjectName(u"label_2")
-
-        self.horizontalLayout_12.addWidget(self.label_2)
-
-
-        self.verticalLayout_13.addWidget(self.widget_20)
-
-        self.widget_19 = QWidget(self.widget_11)
-        self.widget_19.setObjectName(u"widget_19")
-        self.horizontalLayout_13 = QHBoxLayout(self.widget_19)
-        self.horizontalLayout_13.setObjectName(u"horizontalLayout_13")
-        self.label_6 = QLabel(self.widget_19)
-        self.label_6.setObjectName(u"label_6")
-
-        self.horizontalLayout_13.addWidget(self.label_6)
-
-
-        self.verticalLayout_13.addWidget(self.widget_19)
-
-
-        self.horizontalLayout.addWidget(self.widget_11)
-
-        self.widget_12 = QWidget(self.widget_10)
-        self.widget_12.setObjectName(u"widget_12")
-        self.widget_12.setMaximumSize(QSize(30, 150))
-        self.horizontalLayout_14 = QHBoxLayout(self.widget_12)
-        self.horizontalLayout_14.setSpacing(0)
-        self.horizontalLayout_14.setObjectName(u"horizontalLayout_14")
-        self.horizontalLayout_14.setContentsMargins(0, 0, 0, 0)
-        self.pushButton = QPushButton(self.widget_12)
-        self.pushButton.setObjectName(u"pushButton")
-        self.pushButton.setMinimumSize(QSize(25, 50))
-        self.pushButton.setMaximumSize(QSize(25, 150))
-        self.pushButton.setStyleSheet(u"QPushButton{\n"
-"                                  border:none;\n"
-"                                    }\n"
-"                                                              \n"
-"                                QPushButton:hover{\n"
-"                                  background-color: #b3b3b3;\n"
-"                                }")
-        icon3 = QIcon()
-        icon3.addFile(u"UI/UI resources/BlackIcons/threeDotMenu.svg", QSize(), QIcon.Normal, QIcon.Off)
-        self.pushButton.setIcon(icon3)
-        self.pushButton.setIconSize(QSize(20, 30))
-
-        self.horizontalLayout_14.addWidget(self.pushButton)
-
-
-        self.horizontalLayout.addWidget(self.widget_12)
-
-
-        self.studentsViewGridLayout.addWidget(self.widget_10, 0, 0, 1, 1)
-
 
         self.gridLayout_3.addLayout(self.studentsViewGridLayout, 0, 0, 1, 1)
 
@@ -650,7 +590,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 1126, 458))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 1144, 476))
         self.horizontalLayout_11 = QHBoxLayout(self.scrollAreaWidgetContents_2)
         self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
         self.coursesGridLayout = QGridLayout()
@@ -774,13 +714,13 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.stackedWidget)
 
 
-        self.verticalLayout_5.addWidget(self.widget)
+        self.horizontalLayout.addWidget(self.widget)
 
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -789,7 +729,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"App Name", None))
-        self.label_9.setText(QCoreApplication.translate("MainWindow", u"Welcome Back, User", None))
+        self.label_9.setText(QCoreApplication.translate("MainWindow", u"Welcome Back, Admin", None))
         self.label_8.setText("")
         self.userDropMenuButton.setText("")
         self.attendancePage_classNameLabel.setText(QCoreApplication.translate("MainWindow", u"Attendance: Class Name", None))
@@ -803,9 +743,6 @@ class Ui_MainWindow(object):
         self.lineEdit_3.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Find Student ...", None))
         self.studentSearchButton.setText(QCoreApplication.translate("MainWindow", u"Search", None))
         self.refreshbutton.setText(QCoreApplication.translate("MainWindow", u"Refresh", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Student Name:", None))
-        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Student ID:", None))
-        self.pushButton.setText("")
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Dashboard", None))
         self.lineEdit.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Find Course ...", None))
         self.searchCoursesButton.setText(QCoreApplication.translate("MainWindow", u"Search", None))
