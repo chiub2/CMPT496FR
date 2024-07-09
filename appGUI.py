@@ -99,6 +99,7 @@ class MainWindow(QMainWindow):
         self.ui.searchCoursesButton.clicked.connect(self.search_courses)
         
 
+        # Add QLabel to frame_5
         self.ui.takeAttendanceButton.clicked.connect(self.launchCapture)
 
         # Adding Course to DataBase
@@ -554,7 +555,8 @@ class MainWindow(QMainWindow):
 
     def launchCapture(self):
         
-        testCaptureUI.launch()
+        testCaptureUI.launch(self.ui.widget_21)
+
 
     # Context Menu operations for ================================ course card widgets:
     def course_context_menu(self, triggerButton, course_info):

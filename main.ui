@@ -482,7 +482,23 @@ QPushButton:hover{
                 <widget class="QWidget" name="widget_5" native="true">
                  <layout class="QHBoxLayout" name="horizontalLayout_6">
                   <item>
-                   <layout class="QGridLayout" name="studentsAttendanceGrid" columnstretch="0"/>
+                   <layout class="QGridLayout" name="studentsAttendanceGrid"/>
+                  </item>
+                  <item>
+                   <widget class="QWidget" name="widget_21" native="true">
+                    <property name="maximumSize">
+                     <size>
+                      <width>640</width>
+                      <height>480</height>
+                     </size>
+                    </property>
+                    <property name="autoFillBackground">
+                     <bool>false</bool>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background-color: rgb(210, 219, 255);</string>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </widget>
@@ -760,8 +776,8 @@ QPushButton:hover{
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>1144</width>
-                      <height>509</height>
+                      <width>1126</width>
+                      <height>491</height>
                      </rect>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_3">
@@ -1051,8 +1067,8 @@ QPushButton:hover{
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>1144</width>
-                      <height>476</height>
+                      <width>1126</width>
+                      <height>458</height>
                      </rect>
                     </property>
                     <layout class="QHBoxLayout" name="horizontalLayout_11">

@@ -224,48 +224,61 @@ def launch(label):
     try:
         cap = cv2.VideoCapture(0)
         if not cap.isOpened():
-            print("Error: Camera could not be accessed.")
+            logging.error("Error: Camera could not be accessed.")
             return
-        
+
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        cap.set(cv2.CAP_PROP_FPS, 30)  # Set the frame rate to 30 FPS
+        cap.set(cv2.CAP_PROP_FPS, 120)  # Set the frame rate to 120 FPS
 
         encodeListKnownIds = read_encode_file_from_storage()
         if encodeListKnownIds is None:
             return
 
         encodeListKnown, studentIds = encodeListKnownIds
-        print("Loaded student IDs:", studentIds)
+        logging.info(f"Loaded student IDs: {studentIds}")
 
         prev_box = None
         alpha = 0.2
+        frame_skip = 5  # Process every 5th frame
+        frame_count = 0
 
         while running:
             success, img = cap.read()
             if not success:
-                print("Failed to capture image from camera.")
+                logging.error("Failed to capture image from camera.")
                 break
 
-            imgS = cv2.resize(img, (0, 0), None, 0.25, 0.25)
-            imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
-            faceCurFrame = face_recognition.face_locations(imgS)
-            encodeCurFrame = face_recognition.face_encodings(imgS, faceCurFrame)
+            frame_count += 1
+            if frame_count % frame_skip == 0:
+                imgS = cv2.resize(img, (0, 0), fx=0.25, fy=0.25)
+                imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
+                faceCurFrame = face_recognition.face_locations(imgS)
+                encodeCurFrame = face_recognition.face_encodings(imgS, faceCurFrame)
 
-            for encodeFace, faceLoc in zip(encodeCurFrame, faceCurFrame):
-                matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
-                faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
-                matchIndex = np.argmin(faceDis)
-                if matches[matchIndex]:
-                    student_id = studentIds[matchIndex]
-                    current_box = [coord * 4 for coord in faceLoc]
-                    if prev_box is not None:
-                        current_box = [int(prev_box[i] * (1 - alpha) + current_box[i] * alpha) for i in range(4)]
-                    prev_box = current_box
-                    cv2.rectangle(img, (current_box[3], current_box[0]), (current_box[1], current_box[2]), (0, 255, 0), 2)
-                    cv2.putText(img, student_id, (current_box[3], current_box[0] - 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 255, 255), 1)
-                    print('Detected:', student_id)
-                    update_attendance(student_id)
+                if faceCurFrame:
+                    # Process only the closest face
+                    closest_face_index = np.argmin([face_distance(encodeCurFrame[i]) for i in range(len(faceCurFrame))])
+                    encodeFace = encodeCurFrame[closest_face_index]
+                    faceLoc = faceCurFrame[closest_face_index]
+
+                    matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
+                    faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
+                    matchIndex = np.argmin(faceDis)
+                    if matches[matchIndex]:
+                        student_id = studentIds[matchIndex]
+                        current_box = [coord * 4 for coord in faceLoc]
+                        if prev_box is not None:
+                            current_box = [int(prev_box[i] * (1 - alpha) + current_box[i] * alpha) for i in range(4)]
+                        prev_box = current_box
+                        cv2.rectangle(img, (current_box[3], current_box[0]), (current_box[1], current_box[2]), (0, 255, 0), 2)
+                        cv2.putText(img, student_id, (current_box[3], current_box[0] - 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 255, 255), 1)
+                        logging.info(f"Detected: {student_id}")
+                        update_attendance(student_id)
+            else:
+                if prev_box is not None:
+                    cv2.rectangle(img, (prev_box[3], prev_box[0]), (prev_box[1], prev_box[2]), (0, 255, 0), 2)
+                    cv2.putText(img, student_id, (prev_box[3], prev_box[0] - 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 255, 255), 1)
 
             frame = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             h, w, ch = frame.shape
@@ -279,19 +292,16 @@ def launch(label):
                 break
 
     except Exception as e:
-        print("An error occurred:", e)
+        logging.error(f"An error occurred: {e}")
     finally:
         cap.release()
         cv2.destroyAllWindows()
         clear_label(label)
 
-
-def stop():
-    global running
-    running = False
+def face_distance(face_encodings):
+    return np.linalg.norm(face_encodings)
 
 def clear_label(label):
-    # Create a black QPixmap to clear the label
     black_image = QImage(640, 480, QImage.Format_RGB888)
     black_image.fill(Qt.black)
     pixmap = QPixmap.fromImage(black_image)
