@@ -4,6 +4,7 @@ import pickle
 import os
 import firebase_admin
 from firebase_admin import credentials, storage
+import datetime
 
 class EncoderDB():
     ''' The only method you need from this class is uploadFile() '''
@@ -31,6 +32,13 @@ class EncoderDB():
             print(f"Upload successful: {local_path} to {remote_path}")
         except Exception as e:
             print(f"Upload unsuccessful: {local_path} to {remote_path}", e)
+
+    def get_file_url(self, remote_path):
+        ''' 
+        Get public URL of the uploaded file 
+        '''
+        blob = self._bucket.blob(remote_path)
+        return blob.generate_signed_url(expiration=datetime.timedelta(minutes=15))
 
 # Importing student images
 folderPath = "Images"

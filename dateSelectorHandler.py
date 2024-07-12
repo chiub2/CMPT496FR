@@ -1,23 +1,24 @@
+# CalendarDialog.py
 import sys
-from PyQt5.QtWidgets import QApplication,  QVBoxLayout
-from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QDialog, QPushButton, QCalendarWidget, QHBoxLayout
+from PyQt5 import QtCore
 
-class CalendarDialog(QtWidgets.QDialog):
+class CalendarDialog(QDialog):
+    dateSelected = QtCore.pyqtSignal(str)
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Pick a Date")
-
         self.setGeometry(100, 100, 500, 400)
-        self.layout = QVBoxLayout(self)
-        self.calendarDialog =  QtWidgets.QVBoxLayout()
         
-        self.calendarWidget = QtWidgets.QCalendarWidget()
+        self.layout = QVBoxLayout(self)
+        self.calendarWidget = QCalendarWidget()
         self.layout.addWidget(self.calendarWidget)
 
-        self.buttonHBox = QtWidgets.QHBoxLayout()
+        self.buttonHBox = QHBoxLayout()
         self.layout.addLayout(self.buttonHBox)
 
-        self.selectDateButton = QtWidgets.QPushButton()
+        self.selectDateButton = QPushButton("Select Date")
         self.selectDateButton.setMinimumSize(QtCore.QSize(100, 30))
         self.selectDateButton.setMaximumSize(QtCore.QSize(100, 30))
         self.selectDateButton.setStyleSheet("QPushButton{\n"
@@ -31,22 +32,14 @@ class CalendarDialog(QtWidgets.QDialog):
                                             "QPushButton:hover{\n"
                                             "   background-color: #b3b3b3;\n"
                                             "}")
-        self.selectDateButton.setText("Select Date")
         self.buttonHBox.addWidget(self.selectDateButton)
-        
-       
         self.selectDateButton.clicked.connect(self.returnDate)
         self.setModal(True)
     
     def returnDate(self):
+        selected_date = self.calendarWidget.selectedDate().toString("yyyy-MM-dd")
+        self.dateSelected.emit(selected_date)
         self.close()
-        ''' 
-        Date Format:    DAYofWeek MONTH DD YYYY
-                    E.g: Tue Jul 16 2024                 
-        '''
-        return(self.calendarWidget.selectedDate().toString())
-
-        
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

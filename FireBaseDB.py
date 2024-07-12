@@ -22,12 +22,46 @@ class FaceRecognitionFirebaseDB():
         self._course_ref = db.reference('Courses')
         self._attendance_ref = db.reference('Attendance')
 
+
+
+        self.current_course_name = None
+        self.current_section_id = None
+
     def __str__(self):
         return self._name
 
-    def addAttendance(self, attendanceDict):
-        for key, value in attendanceDict.items():
-            self._attendance_ref.child(key).set(value)
+    # def addAttendance(self, attendanceDict):
+    #     for key, value in attendanceDict.items():
+    #         self._attendance_ref.child(key).set(value)
+
+
+    def set_course_context(self, course_name, section_id):
+        self.current_course_name = course_name
+        self.current_section_id = section_id
+
+    def get_course_context(self):
+        return self.current_course_name, self.current_section_id
+
+    def addAttendance(self, course_name, section_id, date, student_id):
+        attendance_ref = self._attendance_ref.child(f"{course_name}-{section_id}/{date}")
+        current_attendance = attendance_ref.get()
+
+        if current_attendance is None or isinstance(current_attendance, dict):
+            current_attendance = []
+
+        if student_id not in current_attendance:
+            current_attendance.append(student_id)
+            attendance_ref.set(current_attendance)
+
+    def getEnrolledStudents(self, course_name, section_id):
+        try:
+            enrolled_students_ref = self._course_ref.child(f"{course_name}-{section_id}/students")
+            enrolled_students = enrolled_students_ref.get()
+            return enrolled_students
+        except Exception as e:
+            logging.error(f"Error occurred while retrieving enrolled students: {str(e)}")
+            raise
+
 
     def addCourse(self, courseDict):
         for key, value in courseDict.items():
@@ -56,6 +90,15 @@ class FaceRecognitionFirebaseDB():
     def deleteStudent(self, student_id):
         try:
             logging.debug(f"Deleting student with ID: {student_id}")
+
+            # Remove the student from all enrolled courses
+            all_courses = self.getAllCourses()
+            for course_name, course_info in all_courses.items():
+                if student_id in course_info.get("students", []):
+                    course_info["students"].remove(student_id)
+                    self.updateCourseData(course_info["course_name"], course_info["section_id"], course_info["course_name"], course_info["section_id"], course_info)
+
+            # Delete the student record from the database
             student_ref = self._student_ref.child(student_id)
             student_ref.delete()
             logging.info(f"Student with ID {student_id} deleted successfully.")
@@ -145,6 +188,17 @@ class FaceRecognitionFirebaseDB():
                     logging.error(f"Error updating student data: {str(e)}")
                     pass
 
+
+    def updateStudentImage(self, student_id, image_url):
+        try:
+            # Update the student's record with the new image URL
+            student_ref = db.reference(f"Students/{student_id}")
+            student_ref.update({"image_url": image_url})
+            print(f"Updated student {student_id} with image URL {image_url}")
+        except Exception as e:
+            print(f"Failed to update student image URL: {e}")
+
+
     def updateInstructorData(self, instructorID: str, newInstructorData: dict, fields: list):
         instructor_info = self.getInstructor(instructorID)
         for key, value in newInstructorData.items():
@@ -188,9 +242,35 @@ class FaceRecognitionFirebaseDB():
         print(student_dict)
         for student_id, details in student_dict.items():
             self.addStudent({student_id:details})
+
+    def updateAttendanceStatus(self, course_name, section_id, student_id, date, is_present):
+        attendance_ref = self._attendance_ref.child(f"{course_name}-{section_id}/{date}")
+        current_attendance = attendance_ref.get()
+
+        if current_attendance is None or isinstance(current_attendance, dict):
+            current_attendance = []
+
+        if is_present:
+            if student_id not in current_attendance:
+                current_attendance.append(student_id)
+        else:
+            if student_id in current_attendance:
+                current_attendance.remove(student_id)
+
+        attendance_ref.set(current_attendance)
+
+
+
+    def getAttendance(self, course_name, section_id, date):
+        try:
+            attendance_ref = self._attendance_ref.child(f"{course_name}-{section_id}/{date}")
+            return attendance_ref.get()
+        except Exception as e:
+            logging.error(f"Error retrieving attendance data: {str(e)}")
+            raise
         
 
-    
+        
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)

@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from tkinter import messagebox
 from PyQt5.uic import loadUi
@@ -25,9 +26,11 @@ from firebase_admin import storage
 import testCaptureUI
 from studentManagementWindow import *
 from dateSelectorHandler import CalendarDialog
-
-
-
+import face_recognition
+from Encoder import EncoderDB
+import urllib.request
+import io
+from PyQt5.QtGui import QPixmap, QImage
 # class VideoThread(threading.Thread):
 #     def __init__(self, label):
 #         super(VideoThread, self).__init__()
@@ -66,6 +69,10 @@ class MainWindow(QMainWindow):
         self.db = FaceRecognitionFirebaseDB()   #-----> db here
         self.ui.setupUi(self)
         self.video_thread = None
+
+        self.current_course_info = None  # Add this line to maintain the current course context
+        self.camera_running = False  # Add this flag
+
         # effect = QGraphicsDropShadowEffect(
         # offset = QPoint(3, 3), blurRadius=25, color=QColor("#111")
         # )
@@ -90,8 +97,9 @@ class MainWindow(QMainWindow):
 
         # Adding students to DataBase
         self.ui.addStudentButton_3.clicked.connect(self.show_add_student_dialog)
+        
+        self.ui.takeAttendanceButton.clicked.connect(self.launch_capture)
 
-        self.ui.manageStudentsAttendanceButton.clicked.connect(self.manageStudentsinClass)
 
         # Connection student refresh button data
         self.ui.refreshbutton.clicked.connect(lambda: self.refresh_student_data(self.ui.studentsViewGridLayout))
@@ -99,12 +107,15 @@ class MainWindow(QMainWindow):
         self.ui.searchCoursesButton.clicked.connect(self.search_courses)
         
 
-        # Add QLabel to frame_5
-        self.ui.takeAttendanceButton.clicked.connect(self.launchCapture)
+        
+
 
         # Adding Course to DataBase
         self.ui.addCourseButton.clicked.connect(self.show_add_course_dialog)
         self.ui.refreshCoursesButton.clicked.connect(self.refresh_course_data)
+        
+        self.switchToManageCoursesPage()
+
 
         #refreshing data
         self.refresh_student_data(self.ui.studentsViewGridLayout)
@@ -113,8 +124,8 @@ class MainWindow(QMainWindow):
 
 
         # Camera control buttons
-        self.ui.camera_on_button.clicked.connect(self.start_camera)
-        self.ui.camera_off_button.clicked.connect(self.stop_camera)
+        # self.ui.camera_on_button.clicked.connect(self.start_camera)
+        # self.ui.camera_off_button.clicked.connect(self.stop_camera)
 
         self.refresh_student_data(self.ui.studentsViewGridLayout)
         self.refresh_course_data()
@@ -122,10 +133,15 @@ class MainWindow(QMainWindow):
 
         self.show()
 
-        
+        # Initialize Firebase Database
+        self.face_recognition_db = FaceRecognitionFirebaseDB()
+        self.encoder_db = EncoderDB()
+       
 
-        
-        
+        # self.ui.dateSelectorButton.clicked.connect(self.pickDate)
+        self.ui.manageStudentsAttendanceButton.clicked.connect(self.manageStudentsinClass)
+
+
         #Menu switching buttons
         # self.ui.attendanceMenuIconButton.clicked.connect(self.switchToAttendancePage)
         # self.ui.attendanceMenuLabelButton.clicked.connect(self.switchToAttendancePage)
@@ -145,6 +161,39 @@ class MainWindow(QMainWindow):
 
 
 #==============================Date picker actions
+
+
+    def get_current_day(self):
+        """Returns the current day of the week in lowercase (e.g., 'monday')"""
+        return datetime.now().strftime('%A').lower()
+
+    def normalize_day(self, day):
+        """Normalizes common day abbreviations and formats to lowercase full day names"""
+        day = day.strip().lower()
+        day_mapping = {
+            "mon": "monday",
+            "tue": "tuesday",
+            "tues": "tuesday",
+            "wed": "wednesday",
+            "thu": "thursday",
+            "thur": "thursday",
+            "fri": "friday",
+            "sat": "saturday",
+            "sun": "sunday"
+        }
+        return day_mapping.get(day, day)
+
+    def is_meeting_day(self, meeting_days):
+        """Checks if today is one of the meeting days"""
+        current_day = self.get_current_day()
+        normalized_meeting_days = [self.normalize_day(day) for day in meeting_days]
+        return current_day in normalized_meeting_days
+    
+
+    def clear_current_course_info_ui(self):
+        # Clear any UI elements related to the current course info
+        self.ui.attendancePage_classNameLabel.setText("Attendance: None")
+
     def pickDate(self):
         self.pickDatesDialog = CalendarDialog()
         if self.pickDatesDialog.exec_() == QDialog.Accepted:
@@ -161,45 +210,63 @@ class MainWindow(QMainWindow):
 
         return
     
+    
+    # def pickDate(self):
+    #     self.pickDatesDialog = CalendarDialog()
+    #     self.pickDatesDialog.dateSelected.connect(self.setAttendanceDate)
+    #     self.pickDatesDialog.exec_()
 
+    # def setAttendanceDate(self, date):
+    #     self.attendanceDate = date
+    #     print("Selected Date: ", self.attendanceDate)
 #==============================Manage students in class
     def manageStudentsinClass(self):
-        # Requirements: pass course name and section ID. 
-        # StudentsManagemenetApp should obtain students' information by 
-        # and ensure students added actually exist
-        self.manageStudents = StudentManagementApp(self.curCourse, self.db)
-        if self.manageStudents.exec_() == QDialog.Accepted:
-            pass
-        self.displayEnrolledStudents(self.ui.studentsAttendanceGrid, self.getEnrolledStudents())
+        if self.current_course_info:
+            self.manageStudents = StudentManagementApp(self.current_course_info, self.db)
+            if self.manageStudents.exec_() == QtWidgets.QDialog.Accepted:
+                pass
+            self.displayEnrolledStudents(self.ui.studentsAttendanceGrid, self.getEnrolledStudents())
+        else:
+            QMessageBox.warning(self, "No Course Selected", "Please select a course before managing students.")
+
+
+
         
     def getEnrolledStudents(self):
-        enrolledStudentsIDs = self.db.getEnrolledStudents(self.curCourse["course_name"], self.curCourse["section_id"])
+        enrolledStudentsIDs = self.db.getEnrolledStudents(self.current_course_info["course_name"], self.current_course_info["section_id"])
         print("Enrolled Students:", enrolledStudentsIDs)
         retDict =  self.db.getStudentinfofromList(enrolledStudentsIDs)
         print(retDict)
         return retDict
+    
 
-    def displayEnrolledStudents(self, container, students):
-        print("These are the students:", students)
-        self.populate_student_grid(container, False, students)        
+    def displayEnrolledStudents(self, container, students, show_attendance_icons=False):
+        for i in reversed(range(container.count())):
+            widget = container.itemAt(i).widget()
+            if widget is not None:
+                widget.setParent(None)
+        self.populate_student_grid(container, False, students, show_attendance_icons=show_attendance_icons)
+
 
 
 #===================================================Camera Control
+   
     def start_camera(self):
         logging.debug("Starting camera")
-        self.video_thread = threading.Thread(target=testCaptureUI.launch, args=(self.ui.camera_interface,))
+        self.video_thread = threading.Thread(target=testCaptureUI.launch, args=(self.ui.camera_interface, self.face_recognition_db, self.current_course_info["course_name"], self.current_course_info["section_id"]))
         self.video_thread.start()
+        self.camera_running = True
 
     def stop_camera(self):
         logging.debug("Stopping camera")
         testCaptureUI.stop()
-        self.video_thread.join()
-        testCaptureUI.clear_label(self.ui.camera_interface)
+        if self.video_thread:
+            self.video_thread.join()
+        self.clear_camera_interface()
+        self.camera_running = False
 
     def clear_camera_interface(self):
-        self.ui.camera_interface.clear()  # Clear the label
-
-        # Optionally, set a black pixmap to cover the area
+        self.ui.camera_interface.clear()
         black_image = QImage(640, 480, QImage.Format_RGB888)
         black_image.fill(QtCore.Qt.black)
         pixmap = QPixmap.fromImage(black_image)
@@ -225,47 +292,36 @@ class MainWindow(QMainWindow):
         self.refresh_course_data()
 
     def refresh_course_data(self):
-        try:
-            for i in reversed(range(self.ui.coursesGridLayout.count())):
-                widget = self.ui.coursesGridLayout.itemAt(i).widget()
-                if widget is not None:
-                    widget.setParent(None)
-
-            courses = self.db.getAllCourses()
-            row = 0
-            col = 0
-            print(courses)
-            '''
-            Some extremely weird behaviour going on here, if database is empty and user adds a student,
-            students will be of instance list, but if database is not empty and user adds or edits a student,
-            database will be of type dictionary
-
-
-            ---> temp fix, check for instance of courses and execute approprriate algorithm
-            '''
-            if isinstance(courses, list):
-                if courses != None:
-                    for course in courses:
-                        if course != None:
-                            self.createCourseWidget2(row, col, course)
-                            col += 1
-                            if col == 3:
-                                col = 0
-                                row += 1
-            elif isinstance(courses, dict):
-                for course_name, course_info in courses.items():
-                    self.createCourseWidget2(row, col, course_info)
-                    col += 1
-                    if col == 3:
-                        col = 0
-                        row += 1
-            elif courses == None:
-                return
-            
-        except Exception as e:
-            print(f"Error during refresh: {e}")
-
-    
+        if self.camera_running:
+            self.stop_camera()
+        self.current_course_info = None
+        for i in reversed(range(self.ui.coursesGridLayout.count())):
+            widget = self.ui.coursesGridLayout.itemAt(i).widget()
+            if widget is not None:
+                widget.setParent(None)
+        courses = self.db.getAllCourses()
+        row = 0
+        col = 0
+        print(courses)
+        if isinstance(courses, list):
+            if courses != None:
+                for course in courses:
+                    if course != None:
+                        self.createCourseWidget2(row, col, course)
+                        col += 1
+                        if col == 3:
+                            col = 0
+                            row += 1
+        elif isinstance(courses, dict):
+            for course_name, course_info in courses.items():
+                self.createCourseWidget2(row, col, course_info)
+                col += 1
+                if col == 3:
+                    col = 0
+                    row += 1
+        elif courses == None:
+            return
+        
     def edit_course(self, course_name, section_id):
         try:
             course_data = self.db.getCourse(course_name, section_id)
@@ -308,7 +364,7 @@ class MainWindow(QMainWindow):
 
     def populate_courses_grid(self, courses=None):
         if courses is None:
-            courses = self.db.getAllCourses()
+            courses = self.face_recognition_db.getAllCourses()
 
         for i in reversed(range(self.ui.coursesGridLayout.count())):
             widget = self.ui.coursesGridLayout.itemAt(i).widget()
@@ -318,11 +374,14 @@ class MainWindow(QMainWindow):
         row = 0
         col = 0
         for course_info in courses.values():
-            self.createCourseWidget2(row, col, course_info)
-            col += 1
-            if col == 3:
-                col = 0
-                row += 1
+            if course_info is not None:
+                self.createCourseWidget2(row, col, course_info)
+                col += 1
+                if col == 3:
+                    col = 0
+                    row += 1
+            else:
+                logging.warning(f"Course info is None, skipping...")
 
 
 #===================================================Adding students to Database
@@ -336,23 +395,18 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred during search: {str(e)}")
 
-    def populate_student_grid(self, studentsViewContainer, menuOption=True, students=None):
-        if students is None:
-            students = self.db.getAllStudents()
-
-        for i in reversed(range(studentsViewContainer.count())):
-            widget = studentsViewContainer.itemAt(i).widget()
-            if widget is not None:
-                widget.setParent(None)
-
+    def populate_student_grid(self, container, menuOption, students, show_attendance_icons=False):
         row = 0
         col = 0
         for student_id, student_info in students.items():
-            self.createStudentWidget(row, col,  studentsViewContainer, menuOption, student_info)
-            col += 1
-            if col == 3:
-                col = 0
-                row += 1
+            if student_info is not None:
+                self.createStudentWidget(row, col, container, menuOption, student_info, show_attendance_icons)
+                col += 1
+                if col == 3:  # Adjust based on your grid layout
+                    col = 0
+                    row += 1
+            else:
+                logging.warning(f"Student info for {student_id} is None, skipping...")
 
     def show_add_student_dialog(self):
         dialog = AddStudentDialog()
@@ -360,13 +414,57 @@ class MainWindow(QMainWindow):
             student_data = dialog.get_student_data()
             self.add_student_to_db(student_data)
 
-
     def add_student_to_db(self, student_data):
         student_id = student_data["student_id"]
         student_dict = {student_id: student_data}
-        self.db.addStudent(student_dict)
+        self.face_recognition_db.addStudent(student_dict)
+
+        # Handle the image upload and encoding
+        if student_data["image_path"]:
+            image_path = student_data["image_path"]
+            self.handle_image_upload(student_id, image_path)
+        
         QMessageBox.information(self, "Success", "Student added successfully!")
         self.refresh_student_data(self.ui.studentsViewGridLayout)
+
+
+
+    def handle_image_upload(self, student_id, image_path):
+        img = cv2.imread(image_path)
+        if img is not None:
+            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            encode = face_recognition.face_encodings(img_rgb)[0]
+
+            # Load the existing encoder file
+            encoder_file_path = "EncodeFile.p"
+            encode_list_known, student_ids = [], []
+            if os.path.exists(encoder_file_path):
+                with open(encoder_file_path, 'rb') as file:
+                    encode_list_known, student_ids = pickle.load(file)
+
+            # Add the new encoding and student ID
+            encode_list_known.append(encode)
+            student_ids.append(student_id)
+
+            # Save the updated encoder file
+            with open(encoder_file_path, 'wb') as file:
+                pickle.dump([encode_list_known, student_ids], file)
+
+            # Upload the updated encoder file to Firebase
+            encoder_db = EncoderDB()
+            encoder_db.uploadFile(encoder_file_path, "Resources/EncodeFile.p")
+
+            # Upload the image to Firebase Storage using the student ID as the filename
+            remote_image_path = f"Images/{student_id}.png"
+            encoder_db.uploadFile(image_path, remote_image_path)
+
+            # Get the URL of the uploaded image
+            image_url = encoder_db.get_file_url(remote_image_path)
+
+            # Update the student record with the image URL
+            self.db.updateStudentImage(student_id, image_url)
+        else:
+            QMessageBox.warning(self, "Error", "Failed to load the image for encoding.")
 
     def fillStudentAttendanceGrid(self, course_info):
         try:
@@ -420,18 +518,10 @@ class MainWindow(QMainWindow):
             row = 0
             col = 0
             print(students)
-            '''
-            Some extremely weird behaviour going on here, if database is empty and user adds a student,
-            students will be of instance list, but if database is not empty and user adds or edits a student,
-            database will be of type dictionary
-
-
-            ---> temp fix, check for instance of students and execute approprriate algorithm
-            '''
             if isinstance(students, list):
-                if students != None:
+                if students:
                     for student in students:
-                        if student != None:
+                        if student:
                             self.createStudentWidget(row, col, studentGridContainer, True, student)
                             col += 1
                             if col == 3:
@@ -531,18 +621,34 @@ class MainWindow(QMainWindow):
                 pass
     
 
-    def switchToAttendancePage(self, course_info):
-        self.ui.stackedWidget.setCurrentIndex(0)
-        self.curCourse = course_info
-        self.ui.attendancePage_classNameLabel.setText(f"""Attendance: {course_info["course_name"]}-{course_info["section_id"]}""")
-        self.displayEnrolledStudents(self.ui.studentsAttendanceGrid, self.getEnrolledStudents())
+    # def switchToAttendancePage(self, course_info):
+    #     self.ui.stackedWidget.setCurrentIndex(0)
+    #     self.curCourse = course_info
+    #     self.ui.attendancePage_classNameLabel.setText(f"""Attendance: {course_info["course_name"]}-{course_info["section_id"]}""")
+    #     self.displayEnrolledStudents(self.ui.studentsAttendanceGrid, self.getEnrolledStudents())
         
+
+    def switchToAttendancePage(self, course_info):
+        # Stop the camera if it is running
+        if self.camera_running:
+            self.stop_camera()
+
+        # Switch to the attendance page
+        self.ui.stackedWidget.setCurrentIndex(0)
+        self.current_course_info = course_info  # Set the current course context
+        self.ui.attendancePage_classNameLabel.setText(f"""Attendance: {course_info["course_name"]}-{course_info["section_id"]}""")
+        self.displayEnrolledStudents(self.ui.studentsAttendanceGrid, self.getEnrolledStudents(), show_attendance_icons=True)
+
+
+
+    
     def switchToManageStudentsPage(self):
         self.ui.stackedWidget.setCurrentIndex(2)
         # Must populate student tiles here
         # set flag so you don't need to repopulate everytime
 
     def switchToManageCoursesPage(self):
+        self.current_course_info = None
         self.ui.stackedWidget.setCurrentIndex(3)
         # Must populate course tiles here
         # set flag so you don't need to repopulate everytime
@@ -553,11 +659,33 @@ class MainWindow(QMainWindow):
     def switchToProfilePage(self):
         self.ui.stackedWidget.setCurrentIndex(5)
 
-    def launchCapture(self):
-        
-        testCaptureUI.launch(self.ui.widget_21)
+    def getEnrolledStudents(self):
+        enrolledStudentsIDs = self.db.getEnrolledStudents(self.current_course_info["course_name"], self.current_course_info["section_id"])
+        print("Enrolled Students:", enrolledStudentsIDs)
+        retDict =  self.db.getStudentinfofromList(enrolledStudentsIDs)
+        print(retDict)
+        return retDict
+    
 
+    def launch_capture(self):
+        if self.current_course_info:
+            course_name = self.current_course_info["course_name"]
+            section_id = self.current_course_info["section_id"]
+            meeting_days = self.current_course_info.get("meeting_days", [])
+            
+            if not self.is_meeting_day(meeting_days):
+                QMessageBox.warning(self, "Not a Meeting Day", f"Today is not a scheduled meeting day for {course_name}-{section_id}.")
+                return
 
+            if not self.camera_running:  # Start the camera only if it's not running
+                def update_present_students(detected_student_ids):
+                    for student_id in detected_student_ids:
+                        self.mark_student_present(student_id)
+                testCaptureUI.launch(self.ui.widget_21, self.face_recognition_db, course_name, section_id, update_present_students)
+                self.camera_running = True
+        else:
+            QMessageBox.warning(self, "No Course Selected", "Please select a course before taking attendance.")
+                
     # Context Menu operations for ================================ course card widgets:
     def course_context_menu(self, triggerButton, course_info):
 
@@ -601,6 +729,8 @@ class MainWindow(QMainWindow):
                 self.delete_course(course_info["course_name"], course_info["section_id"])
             case "Take Attendance":
                 self.switchToAttendancePage(course_info)
+                self.launch_capture()  # Start the camera when switching to the attendance page
+
             case _:
                 pass
 
@@ -751,13 +881,9 @@ class MainWindow(QMainWindow):
                 pass
 
     # New Student card creator
-    def createStudentWidget(self, rowNumber, columnNumber, parentContainer, menuOption = True, student_info = None):
-
-        # CREATE NEW UNIQUE NAMES FOR THE WIDGETS ---> dev check. REMOVE BEFORE DEPLOY
+    def createStudentWidget(self, rowNumber, columnNumber, parentContainer, menuOption=True, student_info=None, show_attendance_icons=False, attendance_status=False):
         newName = "studentFrame" + student_info["student_id"]
-
-        # print(newName)
-
+        
         self.studentCard = QtWidgets.QWidget()
         self.studentCard.setMinimumSize(QtCore.QSize(250, 120))
         self.studentCard.setMaximumSize(QtCore.QSize(250, 120))
@@ -780,14 +906,27 @@ class MainWindow(QMainWindow):
         self.widget_111.setObjectName("widget_111")
         self.verticalLayout_131 = QtWidgets.QVBoxLayout(self.widget_111)
         self.verticalLayout_131.setObjectName("verticalLayout_131")
-        self.studentNameWidget = QtWidgets.QWidget(self.widget_111)
-        self.studentNameWidget.setObjectName("studentNameWidget")
-        self.horizontalLayout_121 = QtWidgets.QHBoxLayout(self.studentNameWidget)
-        self.horizontalLayout_121.setObjectName("horizontalLayout_121")
-        self.student_name_label = QtWidgets.QLabel(self.studentNameWidget)
+
+        self.studentNameLayout = QtWidgets.QHBoxLayout()
+        self.studentNameLayout.setObjectName("studentNameLayout")
+
+        self.student_name_label = QtWidgets.QLabel(self.widget_111)
         self.student_name_label.setObjectName("student_name_label")
-        self.horizontalLayout_121.addWidget(self.student_name_label)
-        self.verticalLayout_131.addWidget(self.studentNameWidget)
+        self.studentNameLayout.addWidget(self.student_name_label)
+
+        if show_attendance_icons:
+            self.attendanceIconLabel = QtWidgets.QLabel(self.widget_111)
+            self.attendanceIconLabel.setObjectName("attendanceIconLabel")
+            if attendance_status:
+                self.attendanceIconLabel.setText("✔️")  # Use a Unicode green check mark character
+                self.attendanceIconLabel.setStyleSheet("color: green; font-size: 24px;")
+            else:
+                self.attendanceIconLabel.setText("❌")  # Use a Unicode red X character
+                self.attendanceIconLabel.setStyleSheet("color: red; font-size: 24px;")
+            self.studentNameLayout.addWidget(self.attendanceIconLabel)
+
+        self.verticalLayout_131.addLayout(self.studentNameLayout)
+
         self.studentIDWidget = QtWidgets.QWidget(self.widget_111)
         self.studentIDWidget.setObjectName("studentIDWidget")
         self.horizontalLayout_131 = QtWidgets.QHBoxLayout(self.studentIDWidget)
@@ -796,6 +935,7 @@ class MainWindow(QMainWindow):
         self.studentIDLabel.setObjectName("studentIDLabel")
         self.horizontalLayout_131.addWidget(self.studentIDLabel)
         self.verticalLayout_131.addWidget(self.studentIDWidget)
+        
         self.horizontalLayout1.addWidget(self.widget_111)
         if menuOption:
             self.cardMenuButtonWidget = QtWidgets.QWidget(self.studentCard)
@@ -817,7 +957,6 @@ class MainWindow(QMainWindow):
                     "                                }")
             self.studentCardMenuButton.setObjectName("studentCardMenuButton")
 
-            # Add pixmap Icon to menu button
             icon2 = QtGui.QIcon()
             icon2.addPixmap(QtGui.QPixmap("UI/UI resources/BlackIcons/threeDotMenu.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.studentCardMenuButton.setIcon(icon2)
@@ -826,7 +965,6 @@ class MainWindow(QMainWindow):
             self.horizontalLayout_141.addWidget(self.studentCardMenuButton)
             self.horizontalLayout1.addWidget(self.cardMenuButtonWidget)
 
-        #retranslate functions
         _translate = QtCore.QCoreApplication.translate
         if student_info == None:
             self.student_name_label.setText(_translate("MainWindow", "Full Name"))
@@ -835,15 +973,7 @@ class MainWindow(QMainWindow):
             self.student_name_label.setText(_translate("MainWindow", student_info["full_name"]))
             self.studentIDLabel.setText(_translate("MainWindow", student_info["student_id"]))
 
-        # Create new attribute to Ui_Mainwindow
-        # Syntax : setattr(obj, var, val)
-        # Parameters :
-        # obj : Object whose which attribute is to be assigned.
-        # var : object attribute which has to be assigned.
-        # val : value with which variable is to be assigned.
         setattr(self.ui, newName, self.studentCard)
-
-        #$To uniquely identify each card menu button
         if menuOption:
             setattr(self.ui, "cardMenuButton" + newName, self.studentCardMenuButton)
             menuButton = getattr(self.ui, "cardMenuButton" + newName)
@@ -853,6 +983,26 @@ class MainWindow(QMainWindow):
         self.studentCard.setGraphicsEffect(QGraphicsDropShadowEffect(
         offset = QPoint(3, 3), blurRadius=10, color=QColor("#b3b3b3")
         ))
+
+
+
+    def mark_student_present(self, student_id):
+        for i in range(self.ui.studentsAttendanceGrid.count()):
+            widget = self.ui.studentsAttendanceGrid.itemAt(i).widget()
+            if widget is not None:
+                studentIDLabel = widget.findChild(QtWidgets.QLabel, "studentIDLabel")
+                if studentIDLabel and studentIDLabel.text() == student_id:
+                    attendanceIconLabel = widget.findChild(QtWidgets.QLabel, "attendanceIconLabel")
+                    if attendanceIconLabel:
+                        attendanceIconLabel.setText("✔️")  # Use a Unicode green check mark character
+                        attendanceIconLabel.setStyleSheet("color: green; font-size: 24px;")
+                        widget.update()
+                        # Update the attendance status in the database
+                        course_name = self.current_course_info["course_name"]
+                        section_id = self.current_course_info["section_id"]
+                        today_date = datetime.now().strftime('%Y-%m-%d')
+                        self.db.updateAttendanceStatus(course_name, section_id, student_id, today_date, True)
+                    break
 
 
 if __name__ == "__main__":
