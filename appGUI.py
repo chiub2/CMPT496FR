@@ -396,6 +396,11 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Error", f"An error occurred during search: {str(e)}")
 
     def populate_student_grid(self, container, menuOption, students, show_attendance_icons=False):
+
+        for i in reversed(range(container.count())):
+            widget = container.itemAt(i).widget()
+            if widget is not None:
+                widget.setParent(None)
         row = 0
         col = 0
         for student_id, student_info in students.items():

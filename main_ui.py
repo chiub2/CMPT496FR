@@ -267,6 +267,14 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_6.addLayout(self.studentsAttendanceGrid)
 
+        self.widget_21 = QWidget(self.widget_5)
+        self.widget_21.setObjectName(u"widget_21")
+        self.widget_21.setMaximumSize(QSize(640, 480))
+        self.widget_21.setAutoFillBackground(False)
+        self.widget_21.setStyleSheet(u"background-color: rgb(210, 219, 255);")
+
+        self.horizontalLayout_6.addWidget(self.widget_21)
+
 
         self.verticalLayout_3.addWidget(self.widget_5)
 
@@ -426,7 +434,7 @@ class Ui_MainWindow(object):
         self.scrollArea_4.setWidgetResizable(True)
         self.scrollAreaWidgetContents_5 = QWidget()
         self.scrollAreaWidgetContents_5.setObjectName(u"scrollAreaWidgetContents_5")
-        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 1144, 509))
+        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 1126, 491))
         self.gridLayout_3 = QGridLayout(self.scrollAreaWidgetContents_5)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.studentsViewGridLayout = QGridLayout()
@@ -590,7 +598,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 1144, 476))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 1126, 458))
         self.horizontalLayout_11 = QHBoxLayout(self.scrollAreaWidgetContents_2)
         self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
         self.coursesGridLayout = QGridLayout()
