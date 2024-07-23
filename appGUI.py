@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import time
 from tkinter import messagebox
 from PyQt5.uic import loadUi
 # from PySide6.QtCore import QPoint
@@ -31,67 +32,144 @@ from Encoder import EncoderDB
 import urllib.request
 import io
 from PyQt5.QtGui import QPixmap, QImage
-# class VideoThread(threading.Thread):
-#     def __init__(self, label):
-#         super(VideoThread, self).__init__()
-#         self.label = label
-#         if not isinstance(self.label, QtWidgets.QLabel):
-#             raise TypeError("label must be a QLabel")
-#         self.cap = cv2.VideoCapture(0)
-#         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-#         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-#         self.running = True
-
-#     def run(self):
-#         while self.running:
-#             ret, frame = self.cap.read()
-#             if ret:
-#                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-#                 h, w, ch = frame.shape
-#                 bytes_per_line = ch * w
-#                 qt_image = QImage(frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
-#                 pixmap = QPixmap.fromImage(qt_image)
-#                 self.label.setPixmap(pixmap)
-#                 self.label.update()
-#             else:
-#                 print("Failed to read frame from camera.")
-#         self.cap.release()
-
-#     def stop(self):
-#         self.running = False
+from login import LoginForm  # Import the login form
+from login_ui import Ui_LoginForm  # Adjust the import according to your project structure
+from PyQt5.QtCore import pyqtSignal
 
 
+# class MainWindow(QMainWindow):
+#     def __init__(self):
+#         QMainWindow.__init__(self)
+#         super().__init__()
+#         self.ui = Ui_MainWindow()
+#         self.db = FaceRecognitionFirebaseDB()   #-----> db here
+#         self.ui.setupUi(self)
+#         self.video_thread = None
+
+#         self.current_course_info = None  # Add this line to maintain the current course context
+#         self.camera_running = False  # Add this flag
+
+#         # effect = QGraphicsDropShadowEffect(
+#         # offset = QPoint(3, 3), blurRadius=25, color=QColor("#111")
+#         # )
+#         # self.ui.headerWidget.setGraphicsEffect(effect)
+        
+
+
+#         #Change default Font
+#         QFontDatabase.addApplicationFont("UI/Font/Kamerik105Cyrillic-Bold.ttf")
+#         custom_font = QFont("Kamerik105Cyrillic-Bold")
+#         # custom_font.setWeight(18)
+#         QApplication.setFont(custom_font, "QLabel")
+#         # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+#         # self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+
+
+#         # Load face encodings
+
+        
+#         # Search for students
+#         self.ui.studentSearchButton.clicked.connect(self.search_student)
+
+#         # Adding students to DataBase
+#         self.ui.addStudentButton_3.clicked.connect(self.show_add_student_dialog)
+        
+#         self.ui.takeAttendanceButton.clicked.connect(self.launch_capture)
+
+
+#         # Connection student refresh button data
+#         self.ui.refreshbutton.clicked.connect(lambda: self.refresh_student_data(self.ui.studentsViewGridLayout))
+
+#         self.ui.searchCoursesButton.clicked.connect(self.search_courses)
+        
+
+        
+
+
+#         # Adding Course to DataBase
+#         self.ui.addCourseButton.clicked.connect(self.show_add_course_dialog)
+#         self.ui.refreshCoursesButton.clicked.connect(self.refresh_course_data)
+        
+#         self.switchToManageCoursesPage()
+
+
+#         #refreshing data
+#         self.refresh_student_data(self.ui.studentsViewGridLayout)
+#         self.refresh_course_data()
+
+
+
+#         # Camera control buttons
+#         # self.ui.camera_on_button.clicked.connect(self.start_camera)
+#         # self.ui.camera_off_button.clicked.connect(self.stop_camera)
+
+#         self.refresh_student_data(self.ui.studentsViewGridLayout)
+#         self.refresh_course_data()
+
+
+#         self.show()
+
+#         # Initialize Firebase Database
+#         self.face_recognition_db = FaceRecognitionFirebaseDB()
+#         self.encoder_db = EncoderDB()
+       
+
+#         # self.ui.dateSelectorButton.clicked.connect(self.pickDate)
+#         self.ui.manageStudentsAttendanceButton.clicked.connect(self.manageStudentsinClass)
+
+
+#         #Menu switching buttons
+#         # self.ui.attendanceMenuIconButton.clicked.connect(self.switchToAttendancePage)
+#         # self.ui.attendanceMenuLabelButton.clicked.connect(self.switchToAttendancePage)
+
+#         # self.ui.manageClassesMenuIconButton.clicked.connect(self.switchToManageCoursesPage)
+#         # self.ui.manageClassesMenuLabelButton.clicked.connect(self.switchToManageCoursesPage)
+
+#         # self.ui.manageStudentsMenuIconButton.clicked.connect(self.switchToManageStudentsPage)
+#         # self.ui.manageStudentsMenuLabelButton.clicked.connect(self.switchToManageStudentsPage)
+
+#         # Connect buttons to respective context menus
+#         self.ui.userDropMenuButton.clicked.connect(self.user_context_menu)
+#         self.ui.dateSelectorButton.clicked.connect(self.pickDate)
+
+#         #set default screen
+#         self.switchToManageCoursesPage()
+
+
+from generateTeacherEncoding import generate_teacher_encodings
+from Encoder import EncoderDB
+from Encoder import EncoderDB, read_images_from_firebase, findEncodings, main as run_encoder
+generate_teacher_encodings()
 class MainWindow(QMainWindow):
     def __init__(self):
-        QMainWindow.__init__(self)
-        super().__init__()
-        self.ui = Ui_MainWindow()
-        self.db = FaceRecognitionFirebaseDB()   #-----> db here
-        self.ui.setupUi(self)
-        self.video_thread = None
+        super(MainWindow, self).__init__()
+        self.login_form = LoginForm()
+        self.login_form.show()
+        self.login_form.login_successful.connect(self.show_main_window)
 
+    def show_main_window(self):
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.db = FaceRecognitionFirebaseDB()   #-----> db here
+        self.video_thread = None
         self.current_course_info = None  # Add this line to maintain the current course context
         self.camera_running = False  # Add this flag
 
-        # effect = QGraphicsDropShadowEffect(
-        # offset = QPoint(3, 3), blurRadius=25, color=QColor("#111")
-        # )
-        # self.ui.headerWidget.setGraphicsEffect(effect)
-        
+        self.setup_ui_connections()
+        self.refresh_data()
 
+        self.show()
 
-        #Change default Font
+        # Initialize Firebase Database
+        self.face_recognition_db = FaceRecognitionFirebaseDB()
+        self.encoder_db = EncoderDB()
+
+    def setup_ui_connections(self):
+        # Change default Font
         QFontDatabase.addApplicationFont("UI/Font/Kamerik105Cyrillic-Bold.ttf")
         custom_font = QFont("Kamerik105Cyrillic-Bold")
-        # custom_font.setWeight(18)
         QApplication.setFont(custom_font, "QLabel")
-        # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        # self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
-
-        # Load face encodings
-
-        
         # Search for students
         self.ui.studentSearchButton.clicked.connect(self.search_student)
 
@@ -100,64 +178,25 @@ class MainWindow(QMainWindow):
         
         self.ui.takeAttendanceButton.clicked.connect(self.launch_capture)
 
-
         # Connection student refresh button data
         self.ui.refreshbutton.clicked.connect(lambda: self.refresh_student_data(self.ui.studentsViewGridLayout))
 
         self.ui.searchCoursesButton.clicked.connect(self.search_courses)
-        
-
-        
-
 
         # Adding Course to DataBase
         self.ui.addCourseButton.clicked.connect(self.show_add_course_dialog)
         self.ui.refreshCoursesButton.clicked.connect(self.refresh_course_data)
-        
-        self.switchToManageCoursesPage()
 
-
-        #refreshing data
-        self.refresh_student_data(self.ui.studentsViewGridLayout)
-        self.refresh_course_data()
-
-
-
-        # Camera control buttons
-        # self.ui.camera_on_button.clicked.connect(self.start_camera)
-        # self.ui.camera_off_button.clicked.connect(self.stop_camera)
-
-        self.refresh_student_data(self.ui.studentsViewGridLayout)
-        self.refresh_course_data()
-
-
-        self.show()
-
-        # Initialize Firebase Database
-        self.face_recognition_db = FaceRecognitionFirebaseDB()
-        self.encoder_db = EncoderDB()
-       
-
-        # self.ui.dateSelectorButton.clicked.connect(self.pickDate)
-        self.ui.manageStudentsAttendanceButton.clicked.connect(self.manageStudentsinClass)
-
-
-        #Menu switching buttons
-        # self.ui.attendanceMenuIconButton.clicked.connect(self.switchToAttendancePage)
-        # self.ui.attendanceMenuLabelButton.clicked.connect(self.switchToAttendancePage)
-
-        # self.ui.manageClassesMenuIconButton.clicked.connect(self.switchToManageCoursesPage)
-        # self.ui.manageClassesMenuLabelButton.clicked.connect(self.switchToManageCoursesPage)
-
-        # self.ui.manageStudentsMenuIconButton.clicked.connect(self.switchToManageStudentsPage)
-        # self.ui.manageStudentsMenuLabelButton.clicked.connect(self.switchToManageStudentsPage)
-
-        # Connect buttons to respective context menus
         self.ui.userDropMenuButton.clicked.connect(self.user_context_menu)
         self.ui.dateSelectorButton.clicked.connect(self.pickDate)
 
-        #set default screen
+        self.ui.manageStudentsAttendanceButton.clicked.connect(self.manageStudentsinClass)
+
         self.switchToManageCoursesPage()
+
+    def refresh_data(self):
+        self.refresh_student_data(self.ui.studentsViewGridLayout)
+        self.refresh_course_data()
 
 
 #==============================Date picker actions
@@ -1012,6 +1051,8 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
+    run_encoder()
     app = QApplication(sys.argv)
     window = MainWindow()
     sys.exit(app.exec_())
+
