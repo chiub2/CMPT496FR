@@ -35,6 +35,9 @@ from PyQt5.QtGui import QPixmap, QImage
 from login import LoginForm  # Import the login form
 from login_ui import Ui_LoginForm  # Adjust the import according to your project structure
 from PyQt5.QtCore import pyqtSignal
+import qasync
+import asyncio
+import threading
 
 
 # class MainWindow(QMainWindow):
@@ -143,9 +146,11 @@ generate_teacher_encodings()
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.login_form = LoginForm()
-        self.login_form.show()
-        self.login_form.login_successful.connect(self.show_main_window)
+        # self.login_form = LoginForm()
+        # self.login_form.show()
+        # self.login_form.login_successful.connect(self.show_main_window)
+        self.face_detection_thread = None
+        self.show_main_window()
 
     def show_main_window(self):
         self.ui = Ui_MainWindow()
@@ -195,7 +200,8 @@ class MainWindow(QMainWindow):
         self.switchToManageCoursesPage()
 
     def refresh_data(self):
-        self.refresh_student_data(self.ui.studentsViewGridLayout)
+        attendance_status = self.get_attendance_status()
+        self.refresh_student_data(self.ui.studentsViewGridLayout, attendance_status)
         self.refresh_course_data()
 
 
@@ -264,27 +270,59 @@ class MainWindow(QMainWindow):
             self.manageStudents = StudentManagementApp(self.current_course_info, self.db)
             if self.manageStudents.exec_() == QtWidgets.QDialog.Accepted:
                 pass
-            self.displayEnrolledStudents(self.ui.studentsAttendanceGrid, self.getEnrolledStudents())
+            attendance_status = self.get_attendance_status()
+            self.displayEnrolledStudents(self.ui.studentsAttendanceGrid, self.getEnrolledStudents(), attendance_status, show_attendance_icons=True)
         else:
             QMessageBox.warning(self, "No Course Selected", "Please select a course before managing students.")
 
 
 
+
+
         
     def getEnrolledStudents(self):
-        enrolledStudentsIDs = self.db.getEnrolledStudents(self.current_course_info["course_name"], self.current_course_info["section_id"])
-        print("Enrolled Students:", enrolledStudentsIDs)
-        retDict =  self.db.getStudentinfofromList(enrolledStudentsIDs)
-        print(retDict)
+        if self.current_course_info is None:
+            logging.error("Current course info is not set.")
+            return {}
+
+        course_name = self.current_course_info["course_name"]
+        section_id = self.current_course_info["section_id"]
+        
+        # Add debug logging to verify correct retrieval
+        logging.debug(f"Fetching enrolled students for course: {course_name}, section: {section_id}")
+        
+        enrolledStudentsIDs = self.db.getEnrolledStudents(course_name, section_id)
+        logging.debug(f"Enrolled Students IDs: {enrolledStudentsIDs}")
+        
+        retDict = self.db.getStudentinfofromList(enrolledStudentsIDs)
+        logging.debug(f"Enrolled Students Info: {retDict}")
         return retDict
+
     
 
-    def displayEnrolledStudents(self, container, students, show_attendance_icons=False):
+    def displayEnrolledStudents(self, container, students, attendance_status, show_attendance_icons=False):
         for i in reversed(range(container.count())):
             widget = container.itemAt(i).widget()
             if widget is not None:
                 widget.setParent(None)
-        self.populate_student_grid(container, False, students, show_attendance_icons=show_attendance_icons)
+        self.populate_student_grid(container, False, students, show_attendance_icons=show_attendance_icons, attendance_status=attendance_status)
+
+
+
+
+
+
+    def get_attendance_status(self):
+        """Fetches and returns the current attendance status from the database."""
+        if self.current_course_info is None:
+            return {}
+
+        course_name = self.current_course_info["course_name"]
+        section_id = self.current_course_info["section_id"]
+        today_date = datetime.now().strftime('%Y-%m-%d')
+        
+        attendance_status = self.db.getAttendanceStatus(course_name, section_id, today_date)
+        return attendance_status
 
 
 
@@ -298,9 +336,9 @@ class MainWindow(QMainWindow):
 
     def stop_camera(self):
         logging.debug("Stopping camera")
-        testCaptureUI.stop()
-        if self.video_thread:
-            self.video_thread.join()
+        if self.face_detection_thread:
+            testCaptureUI.stop(self.face_detection_thread)  # Pass the thread here
+            self.face_detection_thread = None
         self.clear_camera_interface()
         self.camera_running = False
 
@@ -434,18 +472,20 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred during search: {str(e)}")
 
-    def populate_student_grid(self, container, menuOption, students, show_attendance_icons=False):
+    def populate_student_grid(self, container, menuOption, students, show_attendance_icons=False, attendance_status=None):
         row = 0
         col = 0
         for student_id, student_info in students.items():
             if student_info is not None:
-                self.createStudentWidget(row, col, container, menuOption, student_info, show_attendance_icons)
+                status = attendance_status.get(student_id, False) if attendance_status else False
+                self.createStudentWidget(row, col, container, menuOption, student_info, show_attendance_icons, status)
                 col += 1
                 if col == 3:  # Adjust based on your grid layout
                     col = 0
                     row += 1
             else:
                 logging.warning(f"Student info for {student_id} is None, skipping...")
+
 
     def show_add_student_dialog(self):
         dialog = AddStudentDialog()
@@ -546,7 +586,7 @@ class MainWindow(QMainWindow):
         return
     
 
-    def refresh_student_data(self, studentGridContainer):
+    def refresh_student_data(self, studentGridContainer, attendance_status=None):
         try:
             for i in reversed(range(studentGridContainer.count())):
                 widget = studentGridContainer.itemAt(i).widget()
@@ -556,23 +596,16 @@ class MainWindow(QMainWindow):
             students = self.db.getAllStudents()
             row = 0
             col = 0
-            print(students)
-            if isinstance(students, list):
-                if students:
-                    for student in students:
-                        if student:
-                            self.createStudentWidget(row, col, studentGridContainer, True, student)
-                            col += 1
-                            if col == 3:
-                                col = 0
-                                row += 1
-            elif isinstance(students, dict):
-                for student_id, student_info in students.items():
-                    self.createStudentWidget(row, col, studentGridContainer, True, student_info)
-                    col += 1
-                    if col == 3:
-                        col = 0
-                        row += 1
+            if attendance_status is None:
+                attendance_status = {}
+
+            for student_id, student_info in students.items():
+                status = attendance_status.get(student_id, False)
+                self.createStudentWidget(row, col, studentGridContainer, True, student_info, show_attendance_icons=True, attendance_status=status)
+                col += 1
+                if col == 3:
+                    col = 0
+                    row += 1
         except Exception as e:
             print(f"Error during refresh: {e}")
 
@@ -675,8 +708,18 @@ class MainWindow(QMainWindow):
         # Switch to the attendance page
         self.ui.stackedWidget.setCurrentIndex(0)
         self.current_course_info = course_info  # Set the current course context
+        logging.debug(f"Switching to attendance page for course: {course_info}")
+
         self.ui.attendancePage_classNameLabel.setText(f"""Attendance: {course_info["course_name"]}-{course_info["section_id"]}""")
-        self.displayEnrolledStudents(self.ui.studentsAttendanceGrid, self.getEnrolledStudents(), show_attendance_icons=True)
+        
+        attendance_status = self.get_attendance_status()  # Get attendance status
+        logging.debug(f"Attendance status fetched: {attendance_status}")
+
+        self.displayEnrolledStudents(self.ui.studentsAttendanceGrid, self.getEnrolledStudents(), attendance_status, show_attendance_icons=True)
+
+
+
+
 
 
 
@@ -699,12 +742,45 @@ class MainWindow(QMainWindow):
         self.ui.stackedWidget.setCurrentIndex(5)
 
     def getEnrolledStudents(self):
-        enrolledStudentsIDs = self.db.getEnrolledStudents(self.current_course_info["course_name"], self.current_course_info["section_id"])
-        print("Enrolled Students:", enrolledStudentsIDs)
-        retDict =  self.db.getStudentinfofromList(enrolledStudentsIDs)
-        print(retDict)
+        if self.current_course_info is None:
+            logging.error("Current course info is not set.")
+            return []
+
+        course_name = self.current_course_info["course_name"]
+        section_id = self.current_course_info["section_id"]
+        
+        # Add debug logging to verify correct retrieval
+        logging.debug(f"Fetching enrolled students for course: {course_name}, section: {section_id}")
+        
+        enrolledStudentsIDs = self.db.getEnrolledStudents(course_name, section_id)
+        logging.debug(f"Enrolled Students IDs from DB: {enrolledStudentsIDs}")
+        
+        retDict = self.db.getStudentinfofromList(enrolledStudentsIDs)
+        logging.debug(f"Enrolled Students Info: {retDict}")
         return retDict
+
+
     
+
+    # def launch_capture(self):
+    #     if self.current_course_info:
+    #         course_name = self.current_course_info["course_name"]
+    #         section_id = self.current_course_info["section_id"]
+    #         meeting_days = self.current_course_info.get("meeting_days", [])
+            
+    #         if not self.is_meeting_day(meeting_days):
+    #             QMessageBox.warning(self, "Not a Meeting Day", f"Today is not a scheduled meeting day for {course_name}-{section_id}.")
+    #             return
+
+    #         if not self.camera_running:  # Start the camera only if it's not running
+    #             def update_present_students(detected_student_ids):
+    #                 for student_id in detected_student_ids:
+    #                     self.mark_student_present(student_id)
+    #             testCaptureUI.launch(self.ui.widget_21, self.face_recognition_db, course_name, section_id, update_present_students)
+    #             self.camera_running = True
+    #     else:
+    #         QMessageBox.warning(self, "No Course Selected", "Please select a course before taking attendance.")
+
 
     def launch_capture(self):
         if self.current_course_info:
@@ -720,10 +796,26 @@ class MainWindow(QMainWindow):
                 def update_present_students(detected_student_ids):
                     for student_id in detected_student_ids:
                         self.mark_student_present(student_id)
-                testCaptureUI.launch(self.ui.widget_21, self.face_recognition_db, course_name, section_id, update_present_students)
+
+                # Stop the existing thread if it is running
+                if self.face_detection_thread is not None:
+                    self.stop_camera()
+
+                self.face_detection_thread = testCaptureUI.launch(
+                    self.ui.widget_21, self.face_recognition_db,
+                    course_name, section_id, update_present_students
+                )
                 self.camera_running = True
         else:
             QMessageBox.warning(self, "No Course Selected", "Please select a course before taking attendance.")
+
+
+
+
+
+
+
+    
                 
     # Context Menu operations for ================================ course card widgets:
     def course_context_menu(self, triggerButton, course_info):
@@ -922,7 +1014,7 @@ class MainWindow(QMainWindow):
     # New Student card creator
     def createStudentWidget(self, rowNumber, columnNumber, parentContainer, menuOption=True, student_info=None, show_attendance_icons=False, attendance_status=False):
         newName = "studentFrame" + student_info["student_id"]
-        
+
         self.studentCard = QtWidgets.QWidget()
         self.studentCard.setMinimumSize(QtCore.QSize(250, 120))
         self.studentCard.setMaximumSize(QtCore.QSize(250, 120))
@@ -957,10 +1049,10 @@ class MainWindow(QMainWindow):
             self.attendanceIconLabel = QtWidgets.QLabel(self.widget_111)
             self.attendanceIconLabel.setObjectName("attendanceIconLabel")
             if attendance_status:
-                self.attendanceIconLabel.setText("✔️")  # Use a Unicode green check mark character
+                self.attendanceIconLabel.setText("✔️")
                 self.attendanceIconLabel.setStyleSheet("color: green; font-size: 24px;")
             else:
-                self.attendanceIconLabel.setText("❌")  # Use a Unicode red X character
+                self.attendanceIconLabel.setText("❌")
                 self.attendanceIconLabel.setStyleSheet("color: red; font-size: 24px;")
             self.studentNameLayout.addWidget(self.attendanceIconLabel)
 
@@ -974,7 +1066,7 @@ class MainWindow(QMainWindow):
         self.studentIDLabel.setObjectName("studentIDLabel")
         self.horizontalLayout_131.addWidget(self.studentIDLabel)
         self.verticalLayout_131.addWidget(self.studentIDWidget)
-        
+
         self.horizontalLayout1.addWidget(self.widget_111)
         if menuOption:
             self.cardMenuButtonWidget = QtWidgets.QWidget(self.studentCard)
@@ -986,7 +1078,7 @@ class MainWindow(QMainWindow):
             self.horizontalLayout_141.setObjectName("horizontalLayout_141")
             self.studentCardMenuButton = QtWidgets.QPushButton(self.cardMenuButtonWidget)
             self.studentCardMenuButton.setMinimumSize(QtCore.QSize(25, 50))
-            self.studentCardMenuButton.setMaximumSize(QtCore.QSize(25, 150))
+            self.studentCardMenuButton.setMaximumSize(QtCore.QSize(150, 50))
             self.studentCardMenuButton.setStyleSheet("QPushButton{\n"
                     "                                  border:none;\n"
                     "                                    }\n"
@@ -1005,7 +1097,7 @@ class MainWindow(QMainWindow):
             self.horizontalLayout1.addWidget(self.cardMenuButtonWidget)
 
         _translate = QtCore.QCoreApplication.translate
-        if student_info == None:
+        if student_info is None:
             self.student_name_label.setText(_translate("MainWindow", "Full Name"))
             self.studentIDLabel.setText(_translate("MainWindow", "Student ID"))
         else:
@@ -1017,7 +1109,7 @@ class MainWindow(QMainWindow):
             setattr(self.ui, "cardMenuButton" + newName, self.studentCardMenuButton)
             menuButton = getattr(self.ui, "cardMenuButton" + newName)
             self.studentCardMenuButton.clicked.connect(lambda: self.student_context_menu(menuButton, student_info))
-        
+
         parentContainer.addWidget(self.studentCard, rowNumber, columnNumber, 1, 1)
         self.studentCard.setGraphicsEffect(QGraphicsDropShadowEffect(
         offset = QPoint(3, 3), blurRadius=10, color=QColor("#b3b3b3")
@@ -1025,7 +1117,15 @@ class MainWindow(QMainWindow):
 
 
 
+
     def mark_student_present(self, student_id):
+        if not self.current_course_info:
+            logging.error("Current course info is not set.")
+            return
+
+        course_name = self.current_course_info["course_name"]
+        section_id = self.current_course_info["section_id"]
+
         for i in range(self.ui.studentsAttendanceGrid.count()):
             widget = self.ui.studentsAttendanceGrid.itemAt(i).widget()
             if widget is not None:
@@ -1037,11 +1137,10 @@ class MainWindow(QMainWindow):
                         attendanceIconLabel.setStyleSheet("color: green; font-size: 24px;")
                         widget.update()
                         # Update the attendance status in the database
-                        course_name = self.current_course_info["course_name"]
-                        section_id = self.current_course_info["section_id"]
                         today_date = datetime.now().strftime('%Y-%m-%d')
                         self.db.updateAttendanceStatus(course_name, section_id, student_id, today_date, True)
                     break
+
 
 
 if __name__ == "__main__":
