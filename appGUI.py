@@ -472,7 +472,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred during search: {str(e)}")
 
-    def populate_student_grid(self, container, menuOption, students, show_attendance_icons=False):
+    def populate_student_grid(self, container, menuOption, students, show_attendance_icons=False, attendance_status=None):
         row = 0
         col = 0
         for student_id, student_info in students.items():
@@ -485,6 +485,7 @@ class MainWindow(QMainWindow):
                     row += 1
             else:
                 logging.warning(f"Student info for {student_id} is None, skipping...")
+
 
 
     def show_add_student_dialog(self):
@@ -601,7 +602,7 @@ class MainWindow(QMainWindow):
 
             for student_id, student_info in students.items():
                 status = attendance_status.get(student_id, False)
-                self.createStudentWidget(row, col, studentGridContainer, True, student_info, show_attendance_icons=True, attendance_status=status)
+                self.createStudentWidget(row, col, studentGridContainer, True, student_info, show_attendance_icons=False, attendance_status=status)
                 col += 1
                 if col == 3:
                     col = 0
@@ -1114,6 +1115,7 @@ class MainWindow(QMainWindow):
         self.studentCard.setGraphicsEffect(QGraphicsDropShadowEffect(
         offset = QPoint(3, 3), blurRadius=10, color=QColor("#b3b3b3")
         ))
+
 
 
 
