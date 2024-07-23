@@ -472,7 +472,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred during search: {str(e)}")
 
-    def populate_student_grid(self, container, menuOption, students, show_attendance_icons=False, attendance_status=None):
+    def populate_student_grid(self, container, menuOption, students, show_attendance_icons=False):
         row = 0
         col = 0
         for student_id, student_info in students.items():
