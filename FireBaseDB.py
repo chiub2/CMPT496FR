@@ -22,7 +22,7 @@ class FaceRecognitionFirebaseDB():
         self._course_ref = db.reference('Courses')
         self._attendance_ref = db.reference('Attendance')
 
-
+        self.db = db
 
         self.current_course_name = None
         self.current_section_id = None
@@ -55,12 +55,15 @@ class FaceRecognitionFirebaseDB():
 
     def getEnrolledStudents(self, course_name, section_id):
         try:
-            enrolled_students_ref = self._course_ref.child(f"{course_name}-{section_id}/students")
-            enrolled_students = enrolled_students_ref.get()
-            return enrolled_students
+            path = f"Courses/{course_name}-{section_id}/students"
+            logging.debug(f"Fetching enrolled students from path: {path}")
+            response = self.db.reference(path).get()
+            enrolledStudents = list(response.values()) if response else []
+            logging.debug(f"Enrolled students: {enrolledStudents}")
+            return enrolledStudents
         except Exception as e:
-            logging.error(f"Error occurred while retrieving enrolled students: {str(e)}")
-            raise
+            logging.error(f"Error fetching enrolled students: {e}")
+            return []
 
 
     def addCourse(self, courseDict):
@@ -243,23 +246,35 @@ class FaceRecognitionFirebaseDB():
         for student_id, details in student_dict.items():
             self.addStudent({student_id:details})
 
-    def updateAttendanceStatus(self, course_name, section_id, student_id, date, is_present):
-        attendance_ref = self._attendance_ref.child(f"{course_name}-{section_id}/{date}")
-        current_attendance = attendance_ref.get()
+    def updateAttendanceStatus(self, course_name, section_id, student_id, date, status):
+        try:
+            path = f"Attendance/{course_name}-{section_id}/{date}"
+            logging.debug(f"Updating attendance status at path: {path}")
+            attendance_ref = self.db.reference(path)
+            attendance_data = attendance_ref.get() or {}
+            
+            if isinstance(attendance_data, dict):
+                attendance_data[student_id] = status
+            else:
+                attendance_data = {student_id: status}
 
-        if current_attendance is None or isinstance(current_attendance, dict):
-            current_attendance = []
-
-        if is_present:
-            if student_id not in current_attendance:
-                current_attendance.append(student_id)
-        else:
-            if student_id in current_attendance:
-                current_attendance.remove(student_id)
-
-        attendance_ref.set(current_attendance)
+            attendance_ref.set(attendance_data)
+            logging.debug(f"Attendance updated for student {student_id}: {status}")
+        except Exception as e:
+            logging.error(f"Error updating attendance status: {e}")
 
 
+    def getAttendanceStatus(self, course_name, section_id, date):
+        try:
+            attendance_path = f"Attendance/{course_name}-{section_id}/{date}.json"
+            response = self.db.child(attendance_path).get()
+            if response.val():
+                return response.val()
+            else:
+                return {}
+        except Exception as e:
+            print(f"Error retrieving attendance status: {e}")
+            return {}
 
     def getAttendance(self, course_name, section_id, date):
         try:
@@ -269,6 +284,21 @@ class FaceRecognitionFirebaseDB():
             logging.error(f"Error retrieving attendance data: {str(e)}")
             raise
         
+    
+    def increment_student_attendance(self, student_id):
+        try:
+            student_ref = self._student_ref.child(student_id)
+            student_data = student_ref.get()
+            if student_data:
+                total_attendance = student_data.get('total_attendance', 0)
+                total_attendance += 1
+                student_ref.update({'total_attendance': total_attendance})
+                logging.info(f"Incremented total attendance for student {student_id} to {total_attendance}.")
+            else:
+                logging.warning(f"Student {student_id} not found in the database.")
+        except Exception as e:
+            logging.error(f"Error incrementing total attendance for student {student_id}: {e}")
+
 
         
 
