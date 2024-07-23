@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LoginForm</class>
+ <widget class="QWidget" name="LoginForm">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MacEwan University</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>MacEwan Username</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-size: 14px; color: #333;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="usernameLineEdit">
+     <property name="styleSheet">
+      <string notr="true">font-size: 14px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Password</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-size: 14px; color: #333;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="passwordLineEdit">
+     <property name="echoMode">
+      <enum>QLineEdit::Password</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-size: 14px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="rememberMeCheckBox">
+     <property name="text">
+      <string>Remember this login for 10 hours</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-size: 12px; color: #333;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="loginButton">
+     <property name="text">
+      <string>Login</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-size: 14px; padding: 10px; background-color: #800000; color: white; border: none; border-radius: 5px;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="faceRecognitionButton">
+     <property name="text">
+      <string>Face Recognition Login</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-size: 14px; padding: 10px; background-color: #800000; color: white; border: none; border-radius: 5px;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="videoLabel">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>480</width>
+       <height>360</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="forgotPasswordButton">
+     <property name="text">
+      <string>Forgot your password?</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-size: 12px; color: #800000; background: none; border: none;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="needHelpButton">
+     <property name="text">
+      <string>Need help?</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-size: 12px; color: #800000; background: none; border: none;</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
