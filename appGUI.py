@@ -38,6 +38,10 @@ from PyQt5.QtCore import pyqtSignal
 import qasync
 import asyncio
 import threading
+import pyqtgraph as pg
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+from tkinter import filedialog, messagebox
 
 
 # class MainWindow(QMainWindow):
@@ -196,6 +200,20 @@ class MainWindow(QMainWindow):
         self.ui.dateSelectorButton.clicked.connect(self.pickDate)
 
         self.ui.manageStudentsAttendanceButton.clicked.connect(self.manageStudentsinClass)
+        self.ui.generateCoursesReportButton.clicked.connect(lambda: self.plotCourseGraph(self.ui.coursesReportsComboBox.currentText()))
+        self.ui.generateStudentsReportButton.clicked.connect(lambda: self.plotStudentsGraph(self.ui.studentsReportsComboBox.currentText()))
+        self.ui.tabWidget.setCurrentIndex(0)
+
+        #Populate reports combobox
+        self.populateComboBox(self.ui.coursesReportsComboBox, self.getCourseNames())
+        self.populateComboBox(self.ui.studentsReportsComboBox, self.getStudentNames())
+        
+        #Reports graphs setup
+        self.ui.coursesReportsGraph.setBackground("w")
+        self.ui.studentsReportsGraph.setBackground("w")
+
+        # saving plots in graph
+        self.ui.downloadCourseReportButton.clicked.connect(lambda: self.saveCoursePlotPdf(self.ui.coursesReportsComboBox.currentText()))
 
         self.switchToManageCoursesPage()
 
@@ -204,7 +222,131 @@ class MainWindow(QMainWindow):
         self.refresh_student_data(self.ui.studentsViewGridLayout, attendance_status)
         self.refresh_course_data()
 
+#==============================Plotting graphs
+        
+    def populateComboBox(self, comboBox, items):
+        index = 0
+        for item in items:
+            comboBox.insertItem(index, item)
+            index += 1
+        return
+    
+    
+    def getCourseNames(self):
+        courses = self.db.getAllCourses()
+        courseNames = [f"{x['course_name']}-{x['section_id']}" for x in courses.values()]
+        return courseNames
+    
+    def getStudentNames(self):
+        students = self.db.getAllStudents()
+        studentNames = [f"{x['full_name']}-{x['student_id']}" for x in students.values()]
+        return studentNames
+    
+    def plot_line(self, plot_graph, dataX, dataY, pen, brush):
+        plot_graph.plot(
+            dataX,
+            dataY,
+            pen=pen,
+            symbol="+",
+            symbolSize=15,
+            symbolBrush=brush,
+        )
 
+    def plotGraph(self, plot_graph, dataX, dataY, title):
+        plot_graph.setBackground("w")
+        plot_graph.setTitle(title, color="black", size="20pt")
+        styles = {"color": "black", "font-size": "18px"}
+        plot_graph.setLabel("left", "Percentage Present (%)", **styles)
+        plot_graph.setLabel("bottom", "Dates", **styles)
+        plot_graph.addLegend()
+        plot_graph.showGrid(x=True, y=True)
+
+        x = range(len(dataX))
+        
+
+        # plot_graph.setXRange(1, max(dataX) + 5)
+        plot_graph.setYRange(min(dataY), max(dataY))        
+        bargraph = pg.BarGraphItem(x=x, height = dataY, width = 0.6, brush = 'b')
+        plot_graph.addItem(bargraph)
+
+        # pen = pg.mkPen(color=(255, 0, 0))
+        # self.plot_line(plot_graph,
+        #     dataY, dataX, pen, "b"
+        # )
+
+        ax = plot_graph.getAxis('bottom')
+        ax.setTicks([list(zip(x,dataX))])
+
+        
+        return 
+    
+    def getCourseInfoForPlot(self, course_name):
+        course_info = course_name.split("-")
+
+        #gets all attendance data in format: {'date': [list of students that attended]}
+        attendance = self.db._attendance_ref.child(course_name).get() 
+        course_data = self.db.getCourse(course_info[0], course_info[-1])
+        return attendance, course_data
+        
+    def plotCourseGraph(self, course_name):
+        self.ui.coursesReportsGraph.clear()
+        #getAttendance data
+        # date = QDate(year, month, day)
+        # course_info = course_name.split("-")
+
+        # #gets all attendance data in format: {'date': [list of students that attended]}
+        # attendance = self.db._attendance_ref.child(course_name).get() 
+        # course_data = self.db.getCourse(course_info[0], course_info[-1])
+
+        attendance, course_data = self.getCourseInfoForPlot(course_name)
+        try:
+            enrolled = len(course_data["students"])
+        except Exception as e:
+            print(e)
+            enrolled = 1
+        dataX = attendance.keys()
+        dataY = [(len(x)/enrolled) * 100 for x in attendance.values()]
+        self.plotGraph(self.ui.coursesReportsGraph, dataX, dataY, title = course_name)
+        return
+    
+    def plotStudentsGraph(self, student_name):
+        self.ui.studentsReportsGraph.clear()
+        self.plotGraph(self.ui.studentsReportsGraph, dataX= ["30", "32", "34", "32", "33", "31", "29", "32", "35", "30"],
+                        dataY = [1, 2, 3, 4, 5, 6, 7, 8, 9, 1],
+                        title = student_name)
+        return
+
+    #==========================Save plot to pdf
+    def saveCoursePlotPdf(self, course_name):
+        data, course_data = self.getCourseInfoForPlot(course_name)
+        try:
+            enrolled = len(course_data["students"])
+        except Exception as e:
+            print(e)
+            enrolled = 1
+        plotFig = self.matPlotGraph(data, course_name, enrolled)
+        file_path = filedialog.asksaveasfilename(initialfile="newReport.pdf",initialdir="..\Downloads\\",defaultextension=".ext", 
+                                                 filetypes=[("PDF","*.pdf"),("All Files", "*.*")])
+
+        pdfFile = PdfPages(file_path)
+        pdfFile.savefig(plotFig)
+        print("file saved")
+        pdfFile.close()
+        return
+    
+    def matPlotGraph(self, data, courseName, enrolled):
+
+        names = data.keys()
+        values = [(len(x)/enrolled) * 100 for x in data.values()]
+
+        fig, axs = plt.subplots(figsize=(9, 5), sharey=True)
+        axs.set_title(f"{courseName} Attendance graph")
+        axs.set_xlabel("Dates")
+        axs.set_ylabel("Percentages")
+
+        axs.bar(names, values)
+
+        return fig
 #==============================Date picker actions
 
 
@@ -363,7 +505,7 @@ class MainWindow(QMainWindow):
         course_name = course_data["course_name"]
         section_id = course_data["section_id"]
         course_dict = {f"{course_name}-{section_id}": course_data}
-        print(course_dict)
+        # print(course_dict)
         self.db.addCourse(course_dict)
         QMessageBox.information(self, "Success", "Course added successfully!")
         self.refresh_course_data()
@@ -379,7 +521,7 @@ class MainWindow(QMainWindow):
         courses = self.db.getAllCourses()
         row = 0
         col = 0
-        print(courses)
+        # print(courses)
         if isinstance(courses, list):
             if courses != None:
                 for course in courses:
@@ -556,7 +698,7 @@ class MainWindow(QMainWindow):
             students = self.db.getAllStudentsinClass()
             row = 0
             col = 0
-            print(students)
+            # print(students)
             '''
             Some extremely weird behaviour going on here, if database is empty and user adds a student,
             students will be of instance list, but if database is not empty and user adds or edits a student,
@@ -615,7 +757,7 @@ class MainWindow(QMainWindow):
         try:
             student_data = self.db.getStudent(student_id)
             oldID = student_data["student_id"]
-            print(student_data, type(student_data))
+            # print(student_data, type(student_data))
             dialog = AddStudentDialog(student_data)
             if dialog.exec_() == QtWidgets.QDialog.Accepted:
                 updated_data = dialog.get_student_data()
@@ -871,7 +1013,7 @@ class MainWindow(QMainWindow):
         # CREATE NEW UNIQUE NAMES FOR THE WIDGETS ---> dev check. REMOVE BEFORE DEPLOY
         newName = "frame" + course_info["course_name"]
 
-        print(newName)
+        # print(newName)
 
         self.courseCard = QtWidgets.QWidget()
         self.courseCard.setMinimumSize(QtCore.QSize(250, 120))

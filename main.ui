@@ -128,7 +128,7 @@ QPushButton:hover{
              </font>
             </property>
             <property name="text">
-             <string>App Name</string>
+             <string>Attendance</string>
             </property>
            </widget>
           </item>
@@ -239,7 +239,7 @@ QPushButton:hover{
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>4</number>
          </property>
          <widget class="QWidget" name="attendancePage">
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -776,8 +776,8 @@ QPushButton:hover{
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>1126</width>
-                      <height>491</height>
+                      <width>1144</width>
+                      <height>509</height>
                      </rect>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_3">
@@ -1067,8 +1067,8 @@ QPushButton:hover{
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>1126</width>
-                      <height>458</height>
+                      <width>1144</width>
+                      <height>476</height>
                      </rect>
                     </property>
                     <layout class="QHBoxLayout" name="horizontalLayout_11">
@@ -1101,23 +1101,215 @@ QPushButton:hover{
              <layout class="QVBoxLayout" name="verticalLayout_17">
               <item>
                <widget class="QLabel" name="label_3">
+                <property name="font">
+                 <font>
+                  <pointsize>14</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
                  <string>Reports</string>
                 </property>
                </widget>
               </item>
               <item>
-               <spacer name="verticalSpacer">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
+               <widget class="QTabWidget" name="tabWidget">
+                <property name="enabled">
+                 <bool>true</bool>
                 </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>653</height>
-                 </size>
+                <property name="styleSheet">
+                 <string notr="true">QComboBox{
+	padding-left:10px;
+	border: 1px solid gray;
+	border-radius: 10px;
+}
+
+QPushButton{
+	padding-left:5px;
+	padding-right:5px;
+	border: 1px solid gray;
+	border-radius: 10px;
+}
+
+QPushButton:hover{
+   background-color: #b3b3b3;
+}
+
+QComboBox::drop-down:button{
+	width:28px;
+	height:28px;
+	 border: 0px solid gray;
+	border-radius:10px; 
+	background:#f7fbff;
+}
+
+QComboBox::down-arrow {
+    border: 5px solid gray;
+	border-radius: 2px;
+}
+
+QComboBox::down-arrow {
+    image: url(:/UI/UI resources/BlackIcons/arrow-down.svg);
+}
+
+QComboBox::drop-down:button: hover{
+	background-color: #b3b3b3;
+}
+
+QComboBox::down-arrow:on { /* shift the arrow when popup is open */
+	top: 1px;
+    left: 1px;
+}</string>
                 </property>
-               </spacer>
+                <property name="currentIndex">
+                 <number>1</number>
+                </property>
+                <widget class="QWidget" name="courseReportsTab">
+                 <attribute name="title">
+                  <string>Courses</string>
+                 </attribute>
+                 <widget class="QComboBox" name="coursesReportsComboBox">
+                  <property name="geometry">
+                   <rect>
+                    <x>30</x>
+                    <y>40</y>
+                    <width>421</width>
+                    <height>30</height>
+                   </rect>
+                  </property>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="editable">
+                   <bool>false</bool>
+                  </property>
+                  <property name="insertPolicy">
+                   <enum>QComboBox::InsertAlphabetically</enum>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>30</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                 </widget>
+                 <widget class="QPushButton" name="generateCoursesReportButton">
+                  <property name="geometry">
+                   <rect>
+                    <x>480</x>
+                    <y>40</y>
+                    <width>101</width>
+                    <height>23</height>
+                   </rect>
+                  </property>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string>Generate Report</string>
+                  </property>
+                 </widget>
+                 <widget class="PlotWidget" name="coursesReportsGraph" native="true">
+                  <property name="geometry">
+                   <rect>
+                    <x>30</x>
+                    <y>110</y>
+                    <width>811</width>
+                    <height>421</height>
+                   </rect>
+                  </property>
+                 </widget>
+                 <widget class="QPushButton" name="downloadCourseReportButton">
+                  <property name="geometry">
+                   <rect>
+                    <x>30</x>
+                    <y>570</y>
+                    <width>101</width>
+                    <height>23</height>
+                   </rect>
+                  </property>
+                  <property name="text">
+                   <string>Download Report</string>
+                  </property>
+                 </widget>
+                </widget>
+                <widget class="QWidget" name="studentsReportsTab">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <attribute name="title">
+                  <string>Students</string>
+                 </attribute>
+                 <widget class="QPushButton" name="generateStudentsReportButton">
+                  <property name="geometry">
+                   <rect>
+                    <x>480</x>
+                    <y>40</y>
+                    <width>101</width>
+                    <height>23</height>
+                   </rect>
+                  </property>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string>Generate Report</string>
+                  </property>
+                 </widget>
+                 <widget class="QComboBox" name="studentsReportsComboBox">
+                  <property name="geometry">
+                   <rect>
+                    <x>30</x>
+                    <y>40</y>
+                    <width>421</width>
+                    <height>30</height>
+                   </rect>
+                  </property>
+                  <property name="insertPolicy">
+                   <enum>QComboBox::InsertAlphabetically</enum>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>30</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                 </widget>
+                 <widget class="PlotWidget" name="studentsReportsGraph" native="true">
+                  <property name="geometry">
+                   <rect>
+                    <x>30</x>
+                    <y>110</y>
+                    <width>811</width>
+                    <height>421</height>
+                   </rect>
+                  </property>
+                 </widget>
+                 <widget class="QPushButton" name="downloadStudentsReportButton">
+                  <property name="geometry">
+                   <rect>
+                    <x>30</x>
+                    <y>570</y>
+                    <width>101</width>
+                    <height>23</height>
+                   </rect>
+                  </property>
+                  <property name="text">
+                   <string>Download Report</string>
+                  </property>
+                 </widget>
+                </widget>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -1267,6 +1459,14 @@ QPushButton:hover{
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">pyqtgraph</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="UI/UI resources/backgoundImages.qrc"/>
   <include location="UI/UI resources/icons.qrc"/>
