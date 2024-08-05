@@ -1,4 +1,3 @@
-# CalendarDialog.py
 import sys
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QDialog, QPushButton, QCalendarWidget, QHBoxLayout
 from PyQt5 import QtCore
@@ -33,13 +32,13 @@ class CalendarDialog(QDialog):
                                             "   background-color: #b3b3b3;\n"
                                             "}")
         self.buttonHBox.addWidget(self.selectDateButton)
-        self.selectDateButton.clicked.connect(self.returnDate)
+        self.selectDateButton.clicked.connect(self.acceptDate)
         self.setModal(True)
     
-    def returnDate(self):
+    def acceptDate(self):
         selected_date = self.calendarWidget.selectedDate().toString("yyyy-MM-dd")
         self.dateSelected.emit(selected_date)
-        self.close()
+        self.accept()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

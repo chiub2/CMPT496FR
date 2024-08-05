@@ -239,7 +239,11 @@ QPushButton:hover{
           <number>0</number>
          </property>
          <property name="currentIndex">
+
           <number>4</number>
+
+          <number>0</number>
+
          </property>
          <widget class="QWidget" name="attendancePage">
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -356,6 +360,16 @@ QPushButton:hover{
                       </spacer>
                      </item>
                      <item>
+                      <widget class="QLabel" name="label_2">
+                       <property name="text">
+                        <string>TextLabel</string>
+                       </property>
+                       <property name="margin">
+                        <number>10</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
                       <widget class="QPushButton" name="dateSelectorButton">
                        <property name="minimumSize">
                         <size>
@@ -414,7 +428,7 @@ QPushButton:hover{
                         </size>
                        </property>
                        <property name="text">
-                        <string>Take Attendance</string>
+                        <string>Stop Attendance</string>
                        </property>
                       </widget>
                      </item>

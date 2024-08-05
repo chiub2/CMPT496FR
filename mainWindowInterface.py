@@ -177,6 +177,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addWidget(self.attendancePage_classNameLabel)
         spacerItem2 = QtWidgets.QSpacerItem(670, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem2)
+        self.label_2 = QtWidgets.QLabel(self.frame)
+        self.label_2.setObjectName("label_2")
+        self.horizontalLayout_3.addWidget(self.label_2)
         self.dateSelectorButton = QtWidgets.QPushButton(self.frame)
         self.dateSelectorButton.setMinimumSize(QtCore.QSize(0, 40))
         self.dateSelectorButton.setMaximumSize(QtCore.QSize(16777215, 40))
@@ -695,18 +698,31 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
+
         self.stackedWidget.setCurrentIndex(4)
         self.tabWidget.setCurrentIndex(1)
+
+        self.stackedWidget.setCurrentIndex(0)
+
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+
         self.label_7.setText(_translate("MainWindow", "Attendance"))
+
+        self.label_7.setText(_translate("MainWindow", "App Name"))
+
         self.label_9.setText(_translate("MainWindow", "Welcome Back, Admin"))
         self.attendancePage_classNameLabel.setText(_translate("MainWindow", "Attendance: Class Name"))
+        self.label_2.setText(_translate("MainWindow", "TextLabel"))
+
+        self.default_date = QtCore.QDate.currentDate().toString("yyyy-MM-dd")
+        self.label_2.setText(self.default_date)
+        
         self.dateSelectorButton.setText(_translate("MainWindow", "Date Selector"))
-        self.takeAttendanceButton.setText(_translate("MainWindow", "Take Attendance"))
+        self.takeAttendanceButton.setText(_translate("MainWindow", "Stop Attendance"))
         self.manageStudentsAttendanceButton.setText(_translate("MainWindow", "Manage Students"))
         self.camera_on_button.setText(_translate("MainWindow", "Turn On"))
         self.camera_off_button.setText(_translate("MainWindow", "Turn Off"))

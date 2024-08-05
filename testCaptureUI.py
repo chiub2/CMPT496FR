@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 import cv2
 import face_recognition
 import pickle
@@ -9,10 +10,9 @@ from firebase_admin import credentials, db, storage, initialize_app
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QLabel
-import asyncio
-import qasync
-from FireBaseDB import FaceRecognitionFirebaseDB
 import threading
+from FireBaseDB import FaceRecognitionFirebaseDB
+
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -41,6 +41,9 @@ class FaceDetectionThread(threading.Thread):
         self.course_name = course_name
         self.section_id = section_id
         self.running = True
+        self.last_update_times = {}  # Track the last update time for each student
+        self.attendance_cache = {}  # Cache to track students already marked for the day
+        self.date_today = datetime.now().strftime('%Y-%m-%d')
 
     def run(self):
         frame_skip = 5
@@ -55,8 +58,10 @@ class FaceDetectionThread(threading.Thread):
 
             frame_count += 1
             if frame_count % frame_skip == 0:
-                imgS = cv2.resize(img, (0, 0), fx=0.25, fy=0.25)
-                imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
+                imgS = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                imgS = cv2.resize(imgS, (0, 0), fx=0.25, fy=0.25)
+                imgS = cv2.cvtColor(imgS, cv2.COLOR_GRAY2RGB)
+
                 faceCurFrame = face_recognition.face_locations(imgS)
                 encodeCurFrame = face_recognition.face_encodings(imgS, faceCurFrame)
 
@@ -70,26 +75,28 @@ class FaceDetectionThread(threading.Thread):
                         student_id = self.studentIds[matchIndex]
                         logging.info(f"Matched student ID: {student_id}")
                         current_box = [coord * 4 for coord in faceLoc]
-                        detected_faces[student_id] = (current_box, 0)  # Reset frame count for the detected face
+                        detected_faces[student_id] = (current_box, 0)
                         detected_students.append(student_id)
                         logging.info(f"Detected: {student_id}")
-                        logging.info(f"Calling update_attendance with student_id: {student_id}")
-                        self.update_attendance(student_id, self.face_recognition_db, self.course_name, self.section_id)
+
+                        if student_id not in self.attendance_cache or not self.attendance_cache[student_id]:
+                            if self.should_update_attendance(student_id):
+                                logging.info(f"Calling update_attendance with student_id: {student_id}")
+                                if self.update_attendance(student_id, self.face_recognition_db, self.course_name, self.section_id):
+                                    self.attendance_cache[student_id] = True
                     else:
                         logging.info("No matching student found.")
 
-                # Increment the frame count for faces that were not detected in the current frame
                 for student_id in list(detected_faces.keys()):
                     box, frames_since_last_seen = detected_faces[student_id]
-                    if frames_since_last_seen < 5:  # Keep the box for up to 5 frames
+                    if frames_since_last_seen < 5:
                         detected_faces[student_id] = (box, frames_since_last_seen + 1)
                         detected_students.append(student_id)
                     else:
                         del detected_faces[student_id]
 
-                self.update_present_students(detected_students)  # Call the callback function with all detected student IDs
+                self.update_present_students(detected_students)
 
-            # Draw all detected faces
             for student_id, (box, _) in detected_faces.items():
                 cv2.rectangle(img, (box[3], box[0]), (box[1], box[2]), (0, 255, 0), 2)
                 cv2.putText(img, student_id, (box[3], box[0] - 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 255, 255), 1)
@@ -105,61 +112,58 @@ class FaceDetectionThread(threading.Thread):
     def stop(self):
         self.running = False
 
-    @staticmethod
-    def update_attendance(student_id, face_recognition_db, course_name, section_id):
+    def should_update_attendance(self, student_id):
+        current_time = time.time()
+        last_update_time = self.last_update_times.get(student_id, 0)
+        if current_time - last_update_time > 5:
+            self.last_update_times[student_id] = current_time
+            return True
+        return False
+
+    def update_attendance(self, student_id, face_recognition_db, course_name, section_id):
         try:
-            # Check if the student is enrolled in the course and section
             enrolled_students_path = f"Courses/{course_name}-{section_id}/students"
             enrolled_students_ref = face_recognition_db.db.reference(enrolled_students_path)
             enrolled_students = enrolled_students_ref.get()
             
             if not enrolled_students or student_id not in enrolled_students:
                 logging.info(f"Student {student_id} is not enrolled in course {course_name}, section {section_id}. Attendance not updated.")
-                return
+                return False
 
-            now = datetime.now().strftime('%Y-%m-%d')
-            logging.info(f"Updating attendance for student {student_id} in course {course_name}, section {section_id} on {now}")
+            logging.info(f"Updating attendance for student {student_id} in course {course_name}, section {section_id} on {self.date_today}")
 
-            attendance_path = f"Attendance/{course_name}-{section_id}/{now}"
+            attendance_path = f"Attendance/{course_name}-{section_id}/{self.date_today}"
             attendance_ref = face_recognition_db.db.reference(attendance_path)
-            current_attendance = attendance_ref.get()
-            if current_attendance is None:
-                current_attendance = []
+            current_attendance = attendance_ref.get() or []
 
             if student_id not in current_attendance:
                 current_attendance.append(student_id)
                 attendance_ref.set(current_attendance)
-                logging.info(f"Attendance for {student_id} in class {course_name}-{section_id} recorded for {now}.")
+                logging.info(f"Attendance for {student_id} in class {course_name}-{section_id} recorded for {self.date_today}.")
 
-                # Increment total attendance for the student
-                FaceDetectionThread.increment_student_attendance(student_id)
+                student_data = db.reference(f'Students/{student_id}').get()
+                if student_data:
+                    total_attendance = student_data.get("total_attendance", 0)
+                    attendance_dates = student_data.get("attendance_dates", [])
+                    if self.date_today not in attendance_dates:
+                        new_attendance = total_attendance + 1
+                        attendance_dates.append(self.date_today)
+                        db.reference(f'Students/{student_id}').update({
+                            "total_attendance": new_attendance,
+                            "attendance_dates": attendance_dates
+                        })
+                        logging.info(f"Updated total attendance for {student_id}: {new_attendance}")
+                    else:
+                        logging.info(f"Attendance for {student_id} already recorded today.")
+                else:
+                    logging.warning(f"Student {student_id} not found in database.")
             else:
-                logging.info(f"Attendance for {student_id} in class {course_name}-{section_id} already recorded for {now}.")
+                logging.info(f"Attendance for {student_id} in class {course_name}-{section_id} already recorded for {self.date_today}.")
+                return False
         except Exception as e:
             logging.error(f"Error updating attendance for {student_id}: {e}")
-
-    @staticmethod
-    def increment_student_attendance(student_id):
-        try:
-            student_data = db.reference(f'Students/{student_id}').get()
-            if student_data:
-                current_attendance = student_data.get("total_attendance", 0)
-                attendance_dates = student_data.get("attendance_dates", [])
-                now = datetime.now().strftime('%Y-%m-%d')
-                if now not in attendance_dates:
-                    new_attendance = current_attendance + 1
-                    attendance_dates.append(now)
-                    db.reference(f'Students/{student_id}').update({
-                        "total_attendance": new_attendance,
-                        "attendance_dates": attendance_dates
-                    })
-                    logging.info(f"Updated total attendance for {student_id}: {new_attendance}")
-                else:
-                    logging.info(f"Attendance for {student_id} already recorded today.")
-            else:
-                logging.warning(f"Student {student_id} not found in database.")
-        except Exception as e:
-            logging.error(f"Error updating total attendance for {student_id}: {e}")
+            return False
+        return True
 
 def read_encode_file_from_storage():
     blob = bucket.blob('Resources/EncodeFile.p')
@@ -234,8 +238,6 @@ if __name__ == "__main__":
     app.exec_()
 
     stop(face_detection_thread)
-
-
 
 
 
