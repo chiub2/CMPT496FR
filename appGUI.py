@@ -142,13 +142,17 @@ import threading
 from generateTeacherEncoding import generate_teacher_encodings
 from Encoder import EncoderDB
 from Encoder import EncoderDB, read_images_from_firebase, findEncodings, main as run_encoder
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog
 generate_teacher_encodings()
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
+
         # self.login_form = LoginForm()
         # self.login_form.show()
         # self.login_form.login_successful.connect(self.show_main_window)
+
         self.face_detection_thread = None
         self.show_main_window()
 
@@ -169,6 +173,9 @@ class MainWindow(QMainWindow):
         self.face_recognition_db = FaceRecognitionFirebaseDB()
         self.encoder_db = EncoderDB()
 
+        # Set default date on label_2
+        self.ui.label_2.setText(datetime.now().strftime('%Y-%m-%d'))
+
     def setup_ui_connections(self):
         # Change default Font
         QFontDatabase.addApplicationFont("UI/Font/Kamerik105Cyrillic-Bold.ttf")
@@ -180,7 +187,7 @@ class MainWindow(QMainWindow):
 
         # Adding students to DataBase
         self.ui.addStudentButton_3.clicked.connect(self.show_add_student_dialog)
-        
+
         self.ui.takeAttendanceButton.clicked.connect(self.launch_capture)
 
         # Connection student refresh button data
@@ -197,12 +204,16 @@ class MainWindow(QMainWindow):
 
         self.ui.manageStudentsAttendanceButton.clicked.connect(self.manageStudentsinClass)
 
+
+        self.ui.takeAttendanceButton.clicked.connect(self.stop_camera)
+
         self.switchToManageCoursesPage()
 
     def refresh_data(self):
         attendance_status = self.get_attendance_status()
         self.refresh_student_data(self.ui.studentsViewGridLayout, attendance_status)
         self.refresh_course_data()
+
 
 
 #==============================Date picker actions
@@ -241,29 +252,18 @@ class MainWindow(QMainWindow):
 
     def pickDate(self):
         self.pickDatesDialog = CalendarDialog()
-        if self.pickDatesDialog.exec_() == QDialog.Accepted:
-            print("dialog ended")
-        else:  
-            ''' 
-            Date Format:    DAYofWeek MONTH DD YYYY
-                        E.g: Tue Jul 16 2024                 
-            '''
-            self.attendanceDate = self.pickDatesDialog.returnDate()
-            print("Calendar Dialog ended")
+        self.pickDatesDialog.dateSelected.connect(self.update_date_label)
+        self.pickDatesDialog.exec_()
+
+    def set_date(self, date):
+            self.attendanceDate = date
+            self.update_date_label()
             print("Selected Date: ", self.attendanceDate)
 
-
-        return
+    def update_date_label(self, selected_date):
+        self.ui.label_2.setText(selected_date)
+        
     
-    
-    # def pickDate(self):
-    #     self.pickDatesDialog = CalendarDialog()
-    #     self.pickDatesDialog.dateSelected.connect(self.setAttendanceDate)
-    #     self.pickDatesDialog.exec_()
-
-    # def setAttendanceDate(self, date):
-    #     self.attendanceDate = date
-    #     print("Selected Date: ", self.attendanceDate)
 #==============================Manage students in class
     def manageStudentsinClass(self):
         if self.current_course_info:
@@ -340,15 +340,23 @@ class MainWindow(QMainWindow):
             testCaptureUI.stop(self.face_detection_thread)  # Pass the thread here
             self.face_detection_thread = None
         self.clear_camera_interface()
+        self.switchToManageCoursesPage()
         self.camera_running = False
 
+    # def clear_camera_interface(self):
+    #     self.ui.camera_interface.clear()
+    #     black_image = QImage(640, 480, QImage.Format_RGB888)
+    #     black_image.fill(QtCore.Qt.black)
+    #     pixmap = QPixmap.fromImage(black_image)
+    #     self.ui.camera_interface.setPixmap(pixmap)
+    #     logging.debug("Camera interface cleared")
+
     def clear_camera_interface(self):
-        self.ui.camera_interface.clear()
         black_image = QImage(640, 480, QImage.Format_RGB888)
-        black_image.fill(QtCore.Qt.black)
+        black_image.fill(Qt.black)
         pixmap = QPixmap.fromImage(black_image)
-        self.ui.camera_interface.setPixmap(pixmap)
-        logging.debug("Camera interface cleared")
+        self.ui.widget_21.setPixmap(pixmap)
+        self.ui.widget_21.update()
 
 
 #===================================================Adding Courses to Database
@@ -811,7 +819,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "No Course Selected", "Please select a course before taking attendance.")
 
 
-
+    
 
 
 
