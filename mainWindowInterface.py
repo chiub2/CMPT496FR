@@ -226,7 +226,7 @@ class Ui_MainWindow(object):
         self.studentsAttendanceGrid = QtWidgets.QGridLayout()
         self.studentsAttendanceGrid.setObjectName("studentsAttendanceGrid")
         self.horizontalLayout_6.addLayout(self.studentsAttendanceGrid)
-        self.widget_21 = QtWidgets.QLabel(self.widget_5)
+        self.widget_21 = QtWidgets.QWidget(self.widget_5)
         self.widget_21.setMaximumSize(QtCore.QSize(640, 480))
         self.widget_21.setAutoFillBackground(False)
         self.widget_21.setStyleSheet("background-color: rgb(210, 219, 255);")
@@ -517,10 +517,110 @@ class Ui_MainWindow(object):
         self.verticalLayout_17 = QtWidgets.QVBoxLayout(self.widget_4)
         self.verticalLayout_17.setObjectName("verticalLayout_17")
         self.label_3 = QtWidgets.QLabel(self.widget_4)
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
         self.verticalLayout_17.addWidget(self.label_3)
-        spacerItem10 = QtWidgets.QSpacerItem(20, 653, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_17.addItem(spacerItem10)
+        self.tabWidget = QtWidgets.QTabWidget(self.widget_4)
+        self.tabWidget.setEnabled(True)
+        self.tabWidget.setStyleSheet("QComboBox{\n"
+"    padding-left:10px;\n"
+"    border: 1px solid gray;\n"
+"    border-radius: 10px;\n"
+"}\n"
+"\n"
+"QPushButton{\n"
+"    padding-left:5px;\n"
+"    padding-right:5px;\n"
+"    border: 1px solid gray;\n"
+"    border-radius: 10px;\n"
+"}\n"
+"\n"
+"QPushButton:hover{\n"
+"   background-color: #b3b3b3;\n"
+"}\n"
+"\n"
+"QComboBox::drop-down:button{\n"
+"    width:28px;\n"
+"    height:28px;\n"
+"     border: 0px solid gray;\n"
+"    border-radius:10px; \n"
+"    background:#f7fbff;\n"
+"}\n"
+"\n"
+"QComboBox::down-arrow {\n"
+"    border: 5px solid gray;\n"
+"    border-radius: 2px;\n"
+"}\n"
+"\n"
+"QComboBox::down-arrow {\n"
+"    image: url(:/UI/UI resources/BlackIcons/arrow-down.svg);\n"
+"}\n"
+"\n"
+"QComboBox::drop-down:button: hover{\n"
+"    background-color: #b3b3b3;\n"
+"}\n"
+"\n"
+"QComboBox::down-arrow:on { /* shift the arrow when popup is open */\n"
+"    top: 1px;\n"
+"    left: 1px;\n"
+"}")
+        self.tabWidget.setObjectName("tabWidget")
+        self.courseReportsTab = QtWidgets.QWidget()
+        self.courseReportsTab.setObjectName("courseReportsTab")
+        self.coursesReportsComboBox = QtWidgets.QComboBox(self.courseReportsTab)
+        self.coursesReportsComboBox.setGeometry(QtCore.QRect(30, 40, 421, 30))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.coursesReportsComboBox.sizePolicy().hasHeightForWidth())
+        self.coursesReportsComboBox.setSizePolicy(sizePolicy)
+        self.coursesReportsComboBox.setEditable(False)
+        self.coursesReportsComboBox.setInsertPolicy(QtWidgets.QComboBox.InsertAlphabetically)
+        self.coursesReportsComboBox.setIconSize(QtCore.QSize(30, 30))
+        self.coursesReportsComboBox.setObjectName("coursesReportsComboBox")
+        self.generateCoursesReportButton = QtWidgets.QPushButton(self.courseReportsTab)
+        self.generateCoursesReportButton.setGeometry(QtCore.QRect(480, 40, 101, 23))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.generateCoursesReportButton.sizePolicy().hasHeightForWidth())
+        self.generateCoursesReportButton.setSizePolicy(sizePolicy)
+        self.generateCoursesReportButton.setObjectName("generateCoursesReportButton")
+        self.coursesReportsGraph = PlotWidget(self.courseReportsTab)
+        self.coursesReportsGraph.setGeometry(QtCore.QRect(30, 110, 811, 421))
+        self.coursesReportsGraph.setObjectName("coursesReportsGraph")
+        self.downloadCourseReportButton = QtWidgets.QPushButton(self.courseReportsTab)
+        self.downloadCourseReportButton.setGeometry(QtCore.QRect(30, 570, 101, 23))
+        self.downloadCourseReportButton.setObjectName("downloadCourseReportButton")
+        self.tabWidget.addTab(self.courseReportsTab, "")
+        self.studentsReportsTab = QtWidgets.QWidget()
+        self.studentsReportsTab.setEnabled(False)
+        self.studentsReportsTab.setObjectName("studentsReportsTab")
+        self.generateStudentsReportButton = QtWidgets.QPushButton(self.studentsReportsTab)
+        self.generateStudentsReportButton.setGeometry(QtCore.QRect(480, 40, 101, 23))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.generateStudentsReportButton.sizePolicy().hasHeightForWidth())
+        self.generateStudentsReportButton.setSizePolicy(sizePolicy)
+        self.generateStudentsReportButton.setObjectName("generateStudentsReportButton")
+        self.studentsReportsComboBox = QtWidgets.QComboBox(self.studentsReportsTab)
+        self.studentsReportsComboBox.setGeometry(QtCore.QRect(30, 40, 421, 30))
+        self.studentsReportsComboBox.setInsertPolicy(QtWidgets.QComboBox.InsertAlphabetically)
+        self.studentsReportsComboBox.setIconSize(QtCore.QSize(30, 30))
+        self.studentsReportsComboBox.setObjectName("studentsReportsComboBox")
+        self.studentsReportsGraph = PlotWidget(self.studentsReportsTab)
+        self.studentsReportsGraph.setGeometry(QtCore.QRect(30, 110, 811, 421))
+        self.studentsReportsGraph.setObjectName("studentsReportsGraph")
+        self.downloadStudentsReportButton = QtWidgets.QPushButton(self.studentsReportsTab)
+        self.downloadStudentsReportButton.setGeometry(QtCore.QRect(30, 570, 101, 23))
+        self.downloadStudentsReportButton.setObjectName("downloadStudentsReportButton")
+        self.tabWidget.addTab(self.studentsReportsTab, "")
+        self.verticalLayout_17.addWidget(self.tabWidget)
         self.verticalLayout_16.addWidget(self.widget_4)
         self.stackedWidget.addWidget(self.reportsPage)
         self.profilePage = QtWidgets.QWidget()
@@ -556,8 +656,8 @@ class Ui_MainWindow(object):
         self.label_14.setFont(font)
         self.label_14.setObjectName("label_14")
         self.verticalLayout_18.addWidget(self.label_14)
-        spacerItem11 = QtWidgets.QSpacerItem(20, 557, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_18.addItem(spacerItem11)
+        spacerItem10 = QtWidgets.QSpacerItem(20, 557, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout_18.addItem(spacerItem10)
         self.horizontalLayout_15.addWidget(self.widget_13)
         self.widget_14 = QtWidgets.QWidget(self.profilePage)
         self.widget_14.setStyleSheet("background-color:rgb(247, 251, 255);")
@@ -589,8 +689,8 @@ class Ui_MainWindow(object):
         self.lineEdit_6.setFont(font)
         self.lineEdit_6.setObjectName("lineEdit_6")
         self.verticalLayout_19.addWidget(self.lineEdit_6)
-        spacerItem12 = QtWidgets.QSpacerItem(20, 557, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_19.addItem(spacerItem12)
+        spacerItem11 = QtWidgets.QSpacerItem(20, 557, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout_19.addItem(spacerItem11)
         self.horizontalLayout_15.addWidget(self.widget_14)
         self.stackedWidget.addWidget(self.profilePage)
         self.verticalLayout.addWidget(self.stackedWidget)
@@ -598,13 +698,22 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
+
+        self.stackedWidget.setCurrentIndex(4)
+        self.tabWidget.setCurrentIndex(1)
+
         self.stackedWidget.setCurrentIndex(0)
+
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+
+        self.label_7.setText(_translate("MainWindow", "Attendance"))
+
         self.label_7.setText(_translate("MainWindow", "App Name"))
+
         self.label_9.setText(_translate("MainWindow", "Welcome Back, Admin"))
         self.attendancePage_classNameLabel.setText(_translate("MainWindow", "Attendance: Class Name"))
         self.label_2.setText(_translate("MainWindow", "TextLabel"))
@@ -627,9 +736,16 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Your Classes:"))
         self.refreshCoursesButton.setText(_translate("MainWindow", "Refresh"))
         self.label_3.setText(_translate("MainWindow", "Reports"))
+        self.generateCoursesReportButton.setText(_translate("MainWindow", "Generate Report"))
+        self.downloadCourseReportButton.setText(_translate("MainWindow", "Download Report"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.courseReportsTab), _translate("MainWindow", "Courses"))
+        self.generateStudentsReportButton.setText(_translate("MainWindow", "Generate Report"))
+        self.downloadStudentsReportButton.setText(_translate("MainWindow", "Download Report"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.studentsReportsTab), _translate("MainWindow", "Students"))
         self.label_10.setText(_translate("MainWindow", "User Name"))
         self.label_12.setText(_translate("MainWindow", "Department Name"))
         self.label_13.setText(_translate("MainWindow", "Password"))
         self.label_14.setText(_translate("MainWindow", "Email"))
+from pyqtgraph import PlotWidget
 import backgoundImages_rc
 import icons_rc
