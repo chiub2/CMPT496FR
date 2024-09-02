@@ -159,6 +159,8 @@ class MainWindow(QMainWindow):
 
         self.face_detection_thread = None
         self.show_main_window()
+        self.attendanceDate = datetime.now().strftime('%Y-%m-%d')  # Initialize with today's date
+
 
     def show_main_window(self):
         self.ui = Ui_MainWindow()
@@ -401,12 +403,24 @@ class MainWindow(QMainWindow):
         self.pickDatesDialog.exec_()
 
     def set_date(self, date):
-            self.attendanceDate = date
-            self.update_date_label()
-            print("Selected Date: ", self.attendanceDate)
+        self.attendanceDate = date
+        self.update_date_label(date)
+        print("Selected Date: ", self.attendanceDate)  # Debug print
+
+        # Stop the current camera session if running
+        if self.camera_running:
+            print("Stopping camera for new date...")
+            self.stop_camera()
+
+        # Restart the camera session with the new date
+        print("Restarting camera with new date...")
+        self.launch_capture()
+
+
 
     def update_date_label(self, selected_date):
         self.ui.label_2.setText(selected_date)
+        print(f"Date label updated to: {selected_date}")
         
     
 #==============================Manage students in class
@@ -420,11 +434,7 @@ class MainWindow(QMainWindow):
         else:
             QMessageBox.warning(self, "No Course Selected", "Please select a course before managing students.")
 
-
-
-
-
-        
+#==============================Attendance
     def getEnrolledStudents(self):
         if self.current_course_info is None:
             logging.error("Current course info is not set.")
@@ -454,9 +464,6 @@ class MainWindow(QMainWindow):
 
 
 
-
-
-
     def get_attendance_status(self):
         """Fetches and returns the current attendance status from the database."""
         if self.current_course_info is None:
@@ -464,10 +471,11 @@ class MainWindow(QMainWindow):
 
         course_name = self.current_course_info["course_name"]
         section_id = self.current_course_info["section_id"]
-        today_date = datetime.now().strftime('%Y-%m-%d')
-        
-        attendance_status = self.db.getAttendanceStatus(course_name, section_id, today_date)
+        date = self.attendanceDate if hasattr(self, 'attendanceDate') else datetime.now().strftime('%Y-%m-%d')  # Use selected date or default to today
+
+        attendance_status = self.db.getAttendanceStatus(course_name, section_id, date)
         return attendance_status
+
 
 
 
@@ -502,7 +510,6 @@ class MainWindow(QMainWindow):
         pixmap = QPixmap.fromImage(black_image)
         self.ui.widget_21.setPixmap(pixmap)
         self.ui.widget_21.update()
-
 
 #===================================================Adding Courses to Database
     def show_add_course_dialog(self):
@@ -872,12 +879,6 @@ class MainWindow(QMainWindow):
         self.displayEnrolledStudents(self.ui.studentsAttendanceGrid, self.getEnrolledStudents(), attendance_status, show_attendance_icons=True)
 
 
-
-
-
-
-
-    
     def switchToManageStudentsPage(self):
         self.ui.stackedWidget.setCurrentIndex(2)
         # Must populate student tiles here
@@ -936,37 +937,58 @@ class MainWindow(QMainWindow):
     #         QMessageBox.warning(self, "No Course Selected", "Please select a course before taking attendance.")
 
 
+    # def launch_capture(self):
+    #     if self.current_course_info:
+    #         course_name = self.current_course_info["course_name"]
+    #         section_id = self.current_course_info["section_id"]
+    #         meeting_days = self.current_course_info.get("meeting_days", [])
+            
+    #         if not self.is_meeting_day(meeting_days):
+    #             QMessageBox.warning(self, "Not a Meeting Day", f"Today is not a scheduled meeting day for {course_name}-{section_id}.")
+    #             return
+
+    #         if not self.camera_running:  # Start the camera only if it's not running
+    #             def update_present_students(detected_student_ids):
+    #                 for student_id in detected_student_ids:
+    #                     self.mark_student_present(student_id)
+
+    #             # Stop the existing thread if it is running
+    #             if self.face_detection_thread is not None:
+    #                 self.stop_camera()
+
+    #             self.face_detection_thread = testCaptureUI.launch(
+    #                 self.ui.widget_21, self.face_recognition_db,
+    #                 course_name, section_id, update_present_students
+    #             )
+    #             self.camera_running = True
+    #     else:
+    #         QMessageBox.warning(self, "No Course Selected", "Please select a course before taking attendance.")
+
+
     def launch_capture(self):
         if self.current_course_info:
             course_name = self.current_course_info["course_name"]
             section_id = self.current_course_info["section_id"]
             meeting_days = self.current_course_info.get("meeting_days", [])
-            
+
             if not self.is_meeting_day(meeting_days):
                 QMessageBox.warning(self, "Not a Meeting Day", f"Today is not a scheduled meeting day for {course_name}-{section_id}.")
                 return
 
-            if not self.camera_running:  # Start the camera only if it's not running
+            if not self.camera_running:
                 def update_present_students(detected_student_ids):
                     for student_id in detected_student_ids:
                         self.mark_student_present(student_id)
-
-                # Stop the existing thread if it is running
-                if self.face_detection_thread is not None:
-                    self.stop_camera()
-
-                self.face_detection_thread = testCaptureUI.launch(
-                    self.ui.widget_21, self.face_recognition_db,
-                    course_name, section_id, update_present_students
-                )
+                selected_date = self.attendanceDate if hasattr(self, 'attendanceDate') else datetime.now().strftime('%Y-%m-%d')
+                print("Launching capture with date: ", selected_date)  # Debug print
+                self.face_detection_thread = testCaptureUI.launch(self.ui.widget_21, self.face_recognition_db, course_name, section_id, update_present_students, selected_date)
                 self.camera_running = True
+            else:
+                print("Camera is already running.")
         else:
             QMessageBox.warning(self, "No Course Selected", "Please select a course before taking attendance.")
 
-
     
-
-
 
 
     
@@ -1280,6 +1302,7 @@ class MainWindow(QMainWindow):
 
         course_name = self.current_course_info["course_name"]
         section_id = self.current_course_info["section_id"]
+        date = self.attendanceDate if hasattr(self, 'attendanceDate') else datetime.now().strftime('%Y-%m-%d')  # Use selected date or default to today
 
         for i in range(self.ui.studentsAttendanceGrid.count()):
             widget = self.ui.studentsAttendanceGrid.itemAt(i).widget()
@@ -1292,9 +1315,9 @@ class MainWindow(QMainWindow):
                         attendanceIconLabel.setStyleSheet("color: green; font-size: 24px;")
                         widget.update()
                         # Update the attendance status in the database
-                        today_date = datetime.now().strftime('%Y-%m-%d')
-                        self.db.updateAttendanceStatus(course_name, section_id, student_id, today_date, True)
+                        self.db.updateAttendanceStatus(course_name, section_id, student_id, date, True)
                     break
+
 
 
 
