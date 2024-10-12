@@ -337,7 +337,7 @@ class MainWindow(QMainWindow):
             print(e)
             enrolled = 1
         plotFig = self.matPlotGraph(data, course_name, enrolled)
-        file_path = filedialog.asksaveasfilename(initialfile="newReport.pdf",initialdir="..\Downloads\\",defaultextension=".ext", 
+        file_path = filedialog.asksaveasfilename(initialfile="newReport.pdf",initialdir="..\\Downloads\\",defaultextension=".ext", 
                                                  filetypes=[("PDF","*.pdf"),("All Files", "*.*")])
 
         pdfFile = PdfPages(file_path)
